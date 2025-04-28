@@ -26,6 +26,7 @@ const Game = () => {
     setAttemptsLeft(3);
     setMessage('');
     setShowNextButton(false); 
+    setshowskipButton(true); 
   };
 
  
