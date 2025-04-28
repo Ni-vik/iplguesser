@@ -9,6 +9,7 @@ export const getRandomPlayer = async (req, res) => {
     if (player) {
       res.json({
         _id: player._id,
+        name : player.playerName,
         career: Object.fromEntries(player.career),
       });
     } else {
