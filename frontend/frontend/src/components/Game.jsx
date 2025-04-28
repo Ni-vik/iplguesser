@@ -112,7 +112,7 @@ const Game = () => {
       <h2 className="text-xl font-semibold mb-6">Current Max Streak: {streak}</h2>
   
       {/* Autosuggest for the player name input */}
-      <div className="mb-4 w-80">
+      <div className="mb-4 w-80 ml-40">
         <Autosuggest
           suggestions={suggestions}
           onSuggestionsFetchRequested={onSuggestionsFetchRequested}
