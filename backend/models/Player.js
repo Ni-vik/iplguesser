@@ -5,5 +5,13 @@ const playerSchema = new mongoose.Schema({
   career: { type: Map, of: String },
 });
 
-const Player = mongoose.model('Player', playerSchema);
-export default Player;
+const playerRoleSchema = new mongoose.Schema({
+  Player: { type: String, required: true },
+  Nationality: { type: String, required: true },
+  Role: { type: String, required: true },
+});
+
+
+// Correct: collection name as a string
+export const Player = mongoose.model('Player', playerSchema, 'players');
+export const PlayerRole = mongoose.model('PlayerRole', playerRoleSchema, 'roles');
