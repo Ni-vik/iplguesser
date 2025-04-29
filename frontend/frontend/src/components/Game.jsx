@@ -25,7 +25,6 @@ const Game = () => {
   const fetchNewPlayer = async () => {
     const playerdata = await getRandomPlayer();
     setPlayer(playerdata);  
-    console.log(playerdata);
     setGuess('');
     setAttemptsLeft(3);
     setMessage('');
