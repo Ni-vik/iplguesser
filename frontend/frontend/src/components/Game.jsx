@@ -146,11 +146,11 @@ const Game = () => {
   return (  
     <>
     {showInstructions && (
-      <div className="fixed inset-0 z-50 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 w-full h-full flex flex-col items-center justify-center">
-        <div className="bg-yellow-50 rounded shadow-md p-6 max-w-xl relative">
+      <div className="fixed inset-0 z-50 bg-yellow-50/50 border-l-4 text-yellow-700 border-yellow-500  p-4 w-full h-full flex flex-col items-center justify-center">
+        <div className="bg-yellow-50/50 rounded shadow-md p-6 max-w-xl relative">
           <p className="font-bold text-lg mb-2">How to Play</p>
-          <p className="mb-4">
-            Guess the player based on the teams they played for each year. You have 3 chances and optional hints.
+          <p className="mb-4 font-bold text-black-700">
+            Guess the player based on the teams they played for each year. You have 3 chances and optional hints.Each hint unlocks after a guess.
             Click "Skip" if you're stuck.
           </p>
           <button
@@ -159,13 +159,6 @@ const Game = () => {
           >
             &times;
           </button>
-          <div className="flex justify-center">
-        <img
-          src="../../public/logos/intro.png" // Replace with your image path
-          alt="Instructions Guide"
-          className="w-full max-w-xs rounded-md border border-yellow-400 shadow"
-        />
-      </div>
         </div>
       </div>
     )}
