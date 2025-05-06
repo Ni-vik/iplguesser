@@ -150,7 +150,7 @@ const Game = () => {
         <div className="bg-yellow-50 rounded shadow-md p-6 max-w-xl relative">
           <p className="font-bold text-lg mb-2">How to Play</p>
           <p className="mb-4">
-            Guess the player based on the teams they played for each year. You have 3 chances and optional hints.
+            Guess the player based on the teams they played for each year. You have 3 chances and optional hints. Each hint unlocks after a guess
             Click "Skip" if you're stuck.
           </p>
           <button
@@ -161,7 +161,7 @@ const Game = () => {
           </button>
           <div className="flex justify-center">
         <img
-          src="../../public/logos/intro.png" // Replace with your image path
+          src="/logos/intro.png" // Replace with your image path
           alt="Instructions Guide"
           className="w-full max-w-xs rounded-md border border-yellow-400 shadow"
         />
