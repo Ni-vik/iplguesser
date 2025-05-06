@@ -123,6 +123,8 @@ const Game = () => {
     placeholder: 'Type player name...',
     value: guess,
     onChange: (event, { newValue }) => setGuess(newValue),
+    className:
+    'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
   };
 
   const handleNextPlayer = () => {
@@ -140,28 +142,26 @@ const Game = () => {
   }
 
   return (
-    <div className="flex flex-col items-center mt-10">
-      <h1 className="text-3xl font-bold mb-6">Guess the Player</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-10">
+      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-white">Guess the Player</h1>
   
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
+
         {sortedYears.map((year) => (
           <LogoCard key={year} team={player.career[year]} year={year} />
         ))}
       </div>
   
-      <h2 className="text-2xl font-bold mb-4 text-green-700 font-mono">
-  🔥 Current Max Streak: <span className="text-black">{streak}</span>
-</h2>
+      <h2 className="text-2xl font-bold mb-2 text-green-700 font-mono text-center">
+        🔥 Max Streak: <span className="text-black dark:text-white">{streak}</span>
+      </h2>
 
-<h3 className="text-xl font-semibold text-purple-700 font-serif">
-  🎯 Current Score: <span className="text-black">{points}</span>
-</h3>
+      <h3 className="text-xl font-semibold text-purple-700 font-serif mb-6 text-center">
+        🎯 Score: <span className="text-black dark:text-white">{points}</span>
+      </h3>
 
-
-      <br />
-  
-      {/* Autosuggest for the player name input */}
-      <div className="mb-4 w-80 ml-40">
+      {/* Autosuggest input */}
+      <div className="mb-6 w-full max-w-sm">
         <Autosuggest
           suggestions={suggestions}
           onSuggestionsFetchRequested={onSuggestionsFetchRequested}
@@ -172,48 +172,56 @@ const Game = () => {
           inputProps={inputProps}
         />
       </div>
-
-      <button
-        onClick={handleGuess}
-        className="mb-4 px-6 py-3 bg-green-600 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-green-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-300"
-      >
-        Guess
-      </button>
   
-      {message && (
-        <div className="mt-4 text-lg font-medium text-center">{message}</div>
-      )}
-  
-      {showNextButton && (
+      <div className="flex flex-wrap gap-4 justify-center items-center mb-6">
         <button
-          onClick={handleNextPlayer}
-          className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-blue-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          onClick={handleGuess}
+          className="px-6 py-3 bg-green-600 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-green-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-300"
         >
-          Next Player
+          Guess
         </button>
-      )}
 
-      {hintButton && (
-        <div className="mt-4 text-center">
-          {nationality && <p><strong>Nationality:</strong> {nationality}</p>}
-          {role && <p><strong>Role:</strong> {role}</p>}
+        {showSkipButton && (
+          <button
+            onClick={showAnswer}
+            className="px-6 py-3 bg-gray-600 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-gray-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-300"
+          >
+            Skip
+          </button>
+        )}
 
+        {showNextButton && (
+          <button
+            onClick={handleNextPlayer}
+            className="px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-blue-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          >
+            Next Player
+          </button>
+        )}
+
+        {hintButton && (
           <button
             onClick={handleHint}
-            className="mt-2 px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-blue-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="px-6 py-3 bg-yellow-500 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-yellow-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-yellow-300"
           >
             Show Hint
           </button>
-        </div>
+        )}
+      </div>
+
+      {hintData.Nationality && (
+        <p className="text-center mb-1 text-sm text-gray-700 dark:text-gray-300">
+          <strong>Nationality:</strong> {hintData.Nationality}
+        </p>
+      )}
+      {hintData.Role && (
+        <p className="text-center text-sm text-gray-700 dark:text-gray-300">
+          <strong>Role:</strong> {hintData.Role}
+        </p>
       )}
 
-      {showSkipButton && (
-        <button
-          onClick={showAnswer}
-          className="mt-4 px-6 py-3 bg-gray-600 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-gray-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-300"
-        >
-          Skip
-        </button>
+      {message && (
+        <div className="mt-6 text-lg font-medium text-center text-red-600 dark:text-red-400">{message}</div>
       )}
     </div>
   );
