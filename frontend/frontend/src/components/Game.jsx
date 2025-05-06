@@ -5,8 +5,10 @@ import LogoCard from './LogoCard';
 import GuessInput from './GuessInput';
 import playerNames from '../../public/players/players.json';
 
+
 const Game = () => {
   const [player, setPlayer] = useState(null);
+  const [showInstructions, setShowInstructions] = useState(true);
   const [guess, setGuess] = useState('');
   const [attemptsLeft, setAttemptsLeft] = useState(3);
   const [showNextButton, setShowNextButton] = useState(false);
@@ -124,7 +126,7 @@ const Game = () => {
     value: guess,
     onChange: (event, { newValue }) => setGuess(newValue),
     className:
-    'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
+    'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5 ',
   };
 
   const handleNextPlayer = () => {
@@ -141,23 +143,21 @@ const Game = () => {
     setStreak(0);
   }
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-10">
-      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-white">Guess the Player</h1>
-  
+  return (    
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50  px-4 py-10">
+      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 ">Guess the Player</h1>
       <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
-
         {sortedYears.map((year) => (
           <LogoCard key={year} team={player.career[year]} year={year} />
         ))}
       </div>
   
       <h2 className="text-2xl font-bold mb-2 text-green-700 font-mono text-center">
-        🔥 Max Streak: <span className="text-black dark:text-white">{streak}</span>
+        🔥 Max Streak: <span className="text-black">{streak}</span>
       </h2>
 
       <h3 className="text-xl font-semibold text-purple-700 font-serif mb-6 text-center">
-        🎯 Score: <span className="text-black dark:text-white">{points}</span>
+        🎯 Score: <span className="text-black ">{points}</span>
       </h3>
 
       {/* Autosuggest input */}
@@ -210,18 +210,18 @@ const Game = () => {
       </div>
 
       {hintData.Nationality && (
-        <p className="text-center mb-1 text-sm text-gray-700 dark:text-gray-300">
+        <p className="text-center mb-1 text-sm text-gray-700 ">
           <strong>Nationality:</strong> {hintData.Nationality}
         </p>
       )}
       {hintData.Role && (
-        <p className="text-center text-sm text-gray-700 dark:text-gray-300">
+        <p className="text-center text-sm text-gray-700 ">
           <strong>Role:</strong> {hintData.Role}
         </p>
       )}
 
       {message && (
-        <div className="mt-6 text-lg font-medium text-center text-red-600 dark:text-red-400">{message}</div>
+        <div className="mt-6 text-lg font-medium text-center text-red-600 ">{message}</div>
       )}
     </div>
   );
