@@ -143,8 +143,36 @@ const Game = () => {
     setStreak(0);
   }
 
-  return (    
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50  px-4 py-10">
+  return (  
+    <>
+    {showInstructions && (
+      <div className="fixed inset-0 z-50 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 w-full h-full flex flex-col items-center justify-center">
+        <div className="bg-yellow-50 rounded shadow-md p-6 max-w-xl relative">
+          <p className="font-bold text-lg mb-2">How to Play</p>
+          <p className="mb-4">
+            Guess the player based on the teams they played for each year. You have 3 chances and optional hints.
+            Click "Skip" if you're stuck.
+          </p>
+          <button
+            onClick={() => setShowInstructions(false)}
+            className="absolute top-2 right-2 text-yellow-700 hover:text-yellow-900 text-xl"
+          >
+            &times;
+          </button>
+          <div className="flex justify-center">
+        <img
+          src="../../public/logos/intro.png" // Replace with your image path
+          alt="Instructions Guide"
+          className="w-full max-w-xs rounded-md border border-yellow-400 shadow"
+        />
+      </div>
+        </div>
+      </div>
+    )}
+    
+    <div className={`${showInstructions ? 'blur-sm pointer-events-none select-none' : ''}`}>
+      {/* Your main game content here */}
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50  px-4 py-10">
       <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 ">Guess the Player</h1>
       <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
         {sortedYears.map((year) => (
@@ -224,7 +252,10 @@ const Game = () => {
         <div className="mt-6 text-lg font-medium text-center text-red-600 ">{message}</div>
       )}
     </div>
-  );
+
+    </div>
+    </>
+    );
 };
 
 export default Game;
