@@ -3,10 +3,21 @@ import { getRandomPlayer, checkPlayerGuess, getHint } from '../api/playerApi';
 import Autosuggest from 'react-autosuggest';
 import LogoCard from './LogoCard';
 import GuessInput from './GuessInput';
-import playerNames from '../../public/players/players.json';
+import playerNames from '../players/players.json';
+import confetti from 'canvas-confetti';
+import { useRef } from 'react';
 
+
+function launchConfetti() {
+  confetti({
+    particleCount: 150,
+    spread: 90,
+    origin: { y: 0.6 },
+  });
+}
 
 const Game = () => {
+  const bottomRef = useRef(null);
   const [player, setPlayer] = useState(null);
   const [showInstructions, setShowInstructions] = useState(true);
   const [guess, setGuess] = useState('');
@@ -23,6 +34,10 @@ const Game = () => {
   const [hintData, setHintData] = useState({ Nationality: '', Role: '' });
   const [attemptsmade, setAttemptsmade] = useState(0);
   const [points , setPoints] = useState(0);
+  const [selectedCardKey, setSelectedCardKey] = useState(null);
+  const [countdown, setCountdown] = useState(30);
+  const [isTimed, setIsTimed] = useState(false); // true = timed mode
+
 
   const fetchNewPlayer = async () => {
     const playerdata = await getRandomPlayer();
@@ -38,11 +53,46 @@ const Game = () => {
     setRole('');
     setHintData({ Nationality: '', Role: '' });
     setAttemptsmade(0);
+    setSelectedCardKey(null);
   };
 
   useEffect(() => {
     fetchNewPlayer();
   }, []);
+
+  useEffect(() => {
+  if (!player || !isTimed) return;
+
+  const timeOverTimer = setTimeout(() => {
+    setMessage('😔 Time over! Correct answer was: ' + player.name);
+
+    const nextPlayerTimer = setTimeout(() => {
+      fetchNewPlayer();
+    }, 5000);
+
+    return () => clearTimeout(nextPlayerTimer);
+  }, 30000);
+
+  return () => clearTimeout(timeOverTimer);
+}, [player, isTimed]);
+
+useEffect(() => {
+  if (!player || !isTimed) return;
+
+  setCountdown(30);
+
+  const interval = setInterval(() => {
+    setCountdown((prev) => {
+      if (prev <= 1) {
+        clearInterval(interval);
+        return 0;
+      }
+      return prev - 1;
+    });
+  }, 1000); // should be 1000ms for 1-second countdown
+
+  return () => clearInterval(interval);
+}, [player, isTimed]);
 
   const handleGuess = async () => {
     if (!guess.trim()) return;
@@ -51,6 +101,7 @@ const Game = () => {
     const data = await checkPlayerGuess(player._id, guess);
     
     if (data.correct) {
+      launchConfetti();
       setMessage('🎯 Correct! Moving to next player...');
       setTimeout(fetchNewPlayer, 2000);
       setStreak(streak + 1);
@@ -96,12 +147,14 @@ const Game = () => {
     if (hintCount === 0) {
       setNationality(data.Nationality);
       setHintData(prev => ({ ...prev, Nationality: data.Nationality }));
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
       setHintCount(1);
     }
     // Second hint shows role
     else if (hintCount === 1 && attemptsmade > 1) {
       setRole(data.Role);
       setHintData(prev => ({ ...prev, Role: data.Role }));
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
       setHintCount(2);
     }
   };
@@ -150,7 +203,7 @@ const Game = () => {
         <div className="bg-yellow-50 rounded shadow-md p-6 max-w-xl relative">
           <p className="font-bold text-lg mb-2">How to Play</p>
           <p className="mb-4">
-            Guess the player based on the teams they played for each year. You have 3 chances and optional hints. Each hint unlocks after a guess
+            Guess the player based on the teams they played for each year. You have 3 chances and optional hints. Each hint unlocks after a guess and after 2nd hint, you can click on any team to view the squad but only for one team.
             Click "Skip" if you're stuck.
           </p>
           <button
@@ -173,13 +226,7 @@ const Game = () => {
     <div className={`${showInstructions ? 'blur-sm pointer-events-none select-none' : ''}`}>
       {/* Your main game content here */}
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50  px-4 py-10">
-      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 ">Guess the Player</h1>
-      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
-        {sortedYears.map((year) => (
-          <LogoCard key={year} team={player.career[year]} year={year} />
-        ))}
-      </div>
-  
+      
       <h2 className="text-2xl font-bold mb-2 text-green-700 font-mono text-center">
         🔥 Max Streak: <span className="text-black">{streak}</span>
       </h2>
@@ -187,6 +234,52 @@ const Game = () => {
       <h3 className="text-xl font-semibold text-purple-700 font-serif mb-6 text-center">
         🎯 Score: <span className="text-black ">{points}</span>
       </h3>
+
+      <div className="mb-4 flex justify-center">
+        <label className="flex items-center cursor-pointer text-md font-medium text-gray-700">
+          <span className="mr-3">{isTimed ? '⏱ Timed Mode' : '🧘‍♂️ Untimed Mode'}</span>
+          <div className="relative">
+            <input
+              type="checkbox"
+              checked={isTimed}
+              onChange={() => setIsTimed(!isTimed)}
+              className="sr-only"
+            />
+            <div className="w-12 h-6 bg-gray-300 rounded-full shadow-inner transition duration-300"></div>
+            <div
+              className={`dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition transform duration-300 ease-in-out ${
+                isTimed ? 'translate-x-6 bg-green-400' : 'bg-red-400'
+              }`}
+            ></div>
+          </div>
+        </label>
+      </div>
+
+      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 ">Guess the Player</h1>
+      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
+        {sortedYears.map((year) => {
+          const key = `${player.career[year]}-${year}`;
+          return (
+            <LogoCard
+              key={key}
+              team={player.career[year]}
+              year={year}
+              attempts={attemptsmade}
+              isSelected={selectedCardKey === key}
+              selectionMade={selectedCardKey !== null}
+              onSelect={() => setSelectedCardKey(key)}
+            />
+          );
+        })}
+      </div>
+
+       {isTimed && (
+          <p className="text-center text-md font-semibold text-gray-600 mb-4">
+            ⏳ Time left: <span className="text-black">{countdown}</span> seconds
+          </p>
+        )}
+  
+
 
       {/* Autosuggest input */}
       <div className="mb-6 w-full max-w-sm">
@@ -252,6 +345,7 @@ const Game = () => {
         <div className="mt-6 text-lg font-medium text-center text-red-600 ">{message}</div>
       )}
     </div>
+    <div ref={bottomRef} />
 
     </div>
     </>
