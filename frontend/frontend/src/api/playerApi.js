@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://iplguesser.onrender.com/api/players'; 
+const API_URL = 'https://guesstheplayer.onrender/api/players'; 
 
 export const getRandomPlayer = async () => {
   const { data } = await axios.get(`${API_URL}/random`);
@@ -16,3 +16,8 @@ export const getHint = async (p_name) => {
   const { data } = await axios.post(`${API_URL}/hint`,{p_name});
   return data;
 }
+
+export const getSquad = async (team, year) => {
+    const { data } = await axios.post(`${API_URL}/squad`, { year, team });
+    return data;
+};

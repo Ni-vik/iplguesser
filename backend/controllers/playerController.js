@@ -1,4 +1,4 @@
-import { Player, PlayerRole } from '../models/Player.js';
+import { Player, PlayerRole , squads } from '../models/Player.js';
 
 export const getRandomPlayer = async (req, res) => {
   try {
@@ -60,5 +60,26 @@ export const getHint = async (req, res) => {
 };
 
 
+export const getSquad = async (req, res) => {
+  console.log('Request body:', req.body);
 
+  const { team, year } = req.body;
+  console.log(`Querying squad with team: ${team}, year: ${year}`);
+
+  try {
+    const squadData = await squads.find({ team, year });
+    console.log('Squad data retrieved:', squadData);
+
+    if (!squadData || squadData.length === 0) {
+      console.log('No squad data found');
+      return res.status(404).json({ message: 'Squad not found' });
+    }
+
+    //console.log('Sending squad players:', squadData[0].players);
+    res.json(squadData[0].players);
+  } catch (error) {
+    console.error('Error retrieving squad:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
 
