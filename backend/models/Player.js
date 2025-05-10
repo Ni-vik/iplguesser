@@ -33,8 +33,15 @@ const teamSchema = new mongoose.Schema({
   }
 });
 
+const scoreSchema = new mongoose.Schema({
+  deviceId: { type: String, required: true, unique: true },
+  name: { type: String, required: true }, // Random name
+  highScore: { type: Number, required: true },
+  lastUpdated: { type: Date, default: Date.now },
+});
+
 // Correct: collection name as a string
 export const Player = mongoose.model('Player', playerSchema, 'players');
 export const PlayerRole = mongoose.model('PlayerRole', playerRoleSchema, 'roles');
 export const squads = mongoose.model('Team', teamSchema , 'squads');
-
+export const Score = mongoose.model('Score', scoreSchema, 'leaderboard');

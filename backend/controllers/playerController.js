@@ -1,5 +1,5 @@
-import { Player, PlayerRole , squads } from '../models/Player.js';
-
+import { Player, PlayerRole , squads , Score } from '../models/Player.js';
+import { generateRandomName } from '../utils/generateName.js';
 export const getRandomPlayer = async (req, res) => {
   try {
     const count = await Player.countDocuments();
@@ -82,4 +82,78 @@ export const getSquad = async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 };
+
+  export const leaderBoardUpdate = async (req, res) => {
+  const { deviceId, score } = req.body;
+  if (!deviceId || score == null) return res.status(400).json({ error: "Invalid data" });
+
+  try {
+    let existing = await Score.findOne({ deviceId });
+
+    if (existing) {
+      if (score > existing.highScore) {
+        existing.highScore = score;
+        existing.lastUpdated = new Date();
+        await existing.save();
+      }
+      return res.json({ message: "Score updated", name: existing.name });
+    } else {
+      const name = generateRandomName();
+      const newEntry = await Score.create({ deviceId, highScore: score, name });  // This should work now
+      return res.json({ message: "New user added", name: newEntry.name });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+export const topScoreGenerator = async (req, res) => {
+  try {
+    const topScores = await Score.find().sort({ highScore: -1 }).limit(10);  // Use Score instead of score
+    res.json(topScores);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const updateScore = async (req, res) => {
+  const { name, highScore } = req.body;
+
+  try {
+    await Score.updateOne(
+      { name: name },
+      {
+        $set: {
+          highScore: highScore,
+          lastUpdated: Date.now()
+        }
+      }
+    );
+    res.status(200).json({ message: "Score updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update score", details: err.message });
+  }
+};
+
+
+export const getScore = async (req, res) => {
+  const { deviceId } = req.body;
+
+  try {
+    const data = await Score.findOne({ deviceId });
+
+    if (!data) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(data);
+  } catch (err) {
+    console.error("You have some error:", err);
+    res.status(500).json({ error: "Failed to retrieve score", details: err.message });
+  }
+};
+
+
+
 
