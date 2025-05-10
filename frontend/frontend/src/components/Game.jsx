@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { getRandomPlayer, checkPlayerGuess, getHint } from '../api/playerApi';
+import { getRandomPlayer, checkPlayerGuess, getHint , leaderBoardUpdate ,getLeaderBoard  } from '../api/playerApi';
 import Autosuggest from 'react-autosuggest';
 import LogoCard from './LogoCard';
 import GuessInput from './GuessInput';
 import playerNames from '../players/players.json';
 import confetti from 'canvas-confetti';
 import { useRef } from 'react';
+import { ChevronLeft, ChevronRight } from "lucide-react"; // Optional icon lib
 
 
 function launchConfetti() {
@@ -16,8 +17,16 @@ function launchConfetti() {
   });
 }
 
+let deviceId = localStorage.getItem("deviceId");
+if (!deviceId) {
+  deviceId = crypto.randomUUID();
+  localStorage.setItem("deviceId", deviceId);
+}
+console.log(deviceId);
+
 const Game = () => {
   const bottomRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
   const [player, setPlayer] = useState(null);
   const [showInstructions, setShowInstructions] = useState(true);
   const [guess, setGuess] = useState('');
@@ -54,9 +63,46 @@ const Game = () => {
     setHintData({ Nationality: '', Role: '' });
     setAttemptsmade(0);
     setSelectedCardKey(null);
+    console.log(playerdata);
+    fetchLeaderboard();
   };
 
+  let deviceIdentity = localStorage.getItem("deviceId");
+  if (!deviceIdentity) {
+    deviceIdentity = crypto.randomUUID();
+    localStorage.setItem("deviceId", deviceIdentity);
+  }
+  console.log(deviceId);
+
+  // Correct async function definition
+async function submitScore(deviceId, streak) {
+  try {
+    await leaderBoardUpdate(deviceId, streak);  // Awaiting async function
+    console.log("Score submitted successfully.");
+  } catch (error) {
+    console.error("Error submitting score:", error);
+  }
+}
+
+const [leaderboard, setLeaderboard] = useState([]);
+
+async function fetchLeaderboard() {
+  try {
+    const data = await getLeaderBoard();  // Awaiting async function
+    console.log("Leaderboard data:", data);
+    setLeaderboard(data);
+  } catch (error) {
+    console.error("Error fetching leaderboard:", error);
+    setLeaderboard([]);
+  }
+}
+
+
+
+
+
   useEffect(() => {
+    fetchLeaderboard();
     fetchNewPlayer();
   }, []);
 
@@ -103,8 +149,12 @@ useEffect(() => {
     if (data.correct) {
       launchConfetti();
       setMessage('🎯 Correct! Moving to next player...');
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+      submitScore(deviceId, newStreak);
+
+      fetchLeaderboard();
       setTimeout(fetchNewPlayer, 2000);
-      setStreak(streak + 1);
 
       if(attemptsmade == 0){
         setPoints(points + 10);
@@ -131,6 +181,7 @@ useEffect(() => {
         setMessage('😔 Chances over! Correct answer was: ' + player.name);
         setShowSkipButton(false);
         setShowNextButton(true);
+        submitScore(deviceId,streak);
         setStreak(0);
         setAttemptsmade(0);
         setHintButton(false);
@@ -184,6 +235,7 @@ useEffect(() => {
 
   const handleNextPlayer = () => {
     fetchNewPlayer();
+    fetchLeaderboard();
   };
 
   if (!player) return <div className="text-center mt-10">Loading...</div>;
@@ -193,6 +245,7 @@ useEffect(() => {
   function showAnswer(){
     setMessage("The correct player was: " + player.name);
     setTimeout(fetchNewPlayer, 2000);
+    submitScore(deviceId,streak);
     setStreak(0);
   }
 
@@ -222,6 +275,7 @@ useEffect(() => {
         </div>
       </div>
     )}
+
     
     <div className={`${showInstructions ? 'blur-sm pointer-events-none select-none' : ''}`}>
       {/* Your main game content here */}
@@ -346,6 +400,59 @@ useEffect(() => {
       )}
     </div>
     <div ref={bottomRef} />
+      {/* <div className="p-4 max-w-md mx-auto bg-white rounded-2xl shadow-md space-y-4">
+  <h2 className="text-2xl font-bold text-center text-gray-800">Leaderboard</h2>
+  {leaderboard.map((entry, index) => (
+    <div
+      key={index}
+      className="flex justify-between items-center p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+    >
+      <span
+        className={`text-gray-700 font-medium ${entry.deviceId === deviceId ? 'text-green-500' : ''}`}
+      >
+        {entry.name}
+      </span>
+      <span className="text-blue-600 font-bold">{entry.highScore}</span>
+    </div>
+  ))}
+</div> */}
+
+       <div>
+      {/* Toggle Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed top-1/2 right-0 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-l-md shadow-lg z-50"
+      >
+        {isOpen ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+      </button>
+
+      {/* Sidebar Container */}
+      <div
+        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 z-40 ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="p-4 max-w-md mx-auto space-y-4">
+          <h2 className="text-2xl font-bold text-center text-gray-800">Leaderboard</h2>
+          {leaderboard.map((entry, index) => (
+            <div
+              key={index}
+              className="flex justify-between items-center p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+            >
+              <span
+                className={`text-gray-700 font-medium ${
+                  entry.deviceId === deviceId ? "text-green-500" : ""
+                }`}
+              >
+                {entry.name}
+              </span>
+              <span className="text-blue-600 font-bold">{entry.highScore}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
 
     </div>
     </>
