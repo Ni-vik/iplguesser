@@ -22,7 +22,6 @@ if (!deviceId) {
   deviceId = crypto.randomUUID();
   localStorage.setItem("deviceId", deviceId);
 }
-console.log(deviceId);
 
 const Game = () => {
   const bottomRef = useRef(null);
@@ -63,7 +62,6 @@ const Game = () => {
     setHintData({ Nationality: '', Role: '' });
     setAttemptsmade(0);
     setSelectedCardKey(null);
-    console.log(playerdata);
     fetchLeaderboard();
   };
 
@@ -72,7 +70,6 @@ const Game = () => {
     deviceIdentity = crypto.randomUUID();
     localStorage.setItem("deviceId", deviceIdentity);
   }
-  console.log(deviceId);
 
   // Correct async function definition
 async function submitScore(deviceId, streak) {
@@ -89,10 +86,8 @@ const [leaderboard, setLeaderboard] = useState([]);
 async function fetchLeaderboard() {
   try {
     const data = await getLeaderBoard();  // Awaiting async function
-    console.log("Leaderboard data:", data);
     setLeaderboard(data);
   } catch (error) {
-    console.error("Error fetching leaderboard:", error);
     setLeaderboard([]);
   }
 }
