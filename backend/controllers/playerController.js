@@ -1,16 +1,51 @@
-import { Player, PlayerRole , squads , Score } from '../models/Player.js';
+import { Player, PlayerRole , squads , Score  } from '../models/Player.js';
 import { generateRandomName } from '../utils/generateName.js';
+
+// export const getRandomPlayer = async (req, res) => {
+//   try {
+//     const { difficulty } = req.query;
+//      const filter = difficulty ? { difficulty } : {};
+//     const count = await Player.countDocuments();
+//     const random = Math.floor(Math.random() * count);
+//     const player = await Player.findOne(filter).skip(random);
+
+//     if (player) {
+//       res.json({
+//         _id: player._id,
+//         name: player.playerName,
+//         career: Object.fromEntries(player.career),
+//         years : player.nonNAYearsCount,
+//         difficulty : player.difficulty
+//       });
+//     } else {
+//       res.status(404).json({ message: 'Player not found' });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
 export const getRandomPlayer = async (req, res) => {
   try {
-    const count = await Player.countDocuments();
+    const { difficulty } = req.query;
+
+    const filter = difficulty ? { difficulty } : {};
+    const count = await Player.countDocuments(filter); // use the correct filter here
+
+    if (count === 0) {
+      return res.status(404).json({ message: 'Player not found' });
+    }
+
     const random = Math.floor(Math.random() * count);
-    const player = await Player.findOne().skip(random);
+    const player = await Player.findOne(filter).skip(random);
 
     if (player) {
       res.json({
         _id: player._id,
         name: player.playerName,
-        career: Object.fromEntries(player.career),
+        career: player.career ? Object.fromEntries(player.career) : undefined,
+        years: player.nonNAYearsCount,
+        difficulty: player.difficulty,
       });
     } else {
       res.status(404).json({ message: 'Player not found' });
@@ -19,6 +54,8 @@ export const getRandomPlayer = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
 
 export const checkGuess = async (req, res) => {
   const { playerId, guess } = req.body;
