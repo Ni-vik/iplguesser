@@ -6,8 +6,11 @@ import GuessInput from './GuessInput';
 import playerNames from '../players/players.json';
 import confetti from 'canvas-confetti';
 import { useRef } from 'react';
-//import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react";
+import { Menu, X, HelpCircle, Trophy, Home } from "lucide-react";
+
+
+
 
 function launchConfetti() {
   confetti({
@@ -22,13 +25,12 @@ if (!deviceId) {
   deviceId = crypto.randomUUID();
   localStorage.setItem("deviceId", deviceId);
 }
-console.log(deviceId);
 
 const Game = () => {
   const bottomRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const [player, setPlayer] = useState(null);
-  const [showInstructions, setShowInstructions] = useState(true);
+  const [showInstructions, setShowInstructions] = useState(false);
   const [guess, setGuess] = useState('');
   const [attemptsLeft, setAttemptsLeft] = useState(3);
   const [showNextButton, setShowNextButton] = useState(false);
@@ -48,7 +50,14 @@ const Game = () => {
   const [isTimed, setIsTimed] = useState(false); // true = timed mode
   const [difficulty, setDifficulty] = useState('random');
   const [showDifficultySelector, setShowDifficultySelector] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
+  const closeAllModals = () => {
+    setShowInstructions(false);
+    setShowLeaderboard(false);
+    setIsNavOpen(false);
+  };
   const fetchNewPlayer = async () => {
     // Use the current difficulty state when fetching new player
     const query = difficulty === 'random' ? undefined : difficulty;
@@ -77,7 +86,6 @@ const Game = () => {
     setHintData({ Nationality: '', Role: '' });
     setAttemptsmade(0);
     setSelectedCardKey(null);
-    console.log(playerdata);
     fetchLeaderboard();
   };
 
@@ -86,7 +94,6 @@ const Game = () => {
     deviceIdentity = crypto.randomUUID();
     localStorage.setItem("deviceId", deviceIdentity);
   }
-  console.log(deviceId);
 
   // Correct async function definition
   async function submitScore(deviceId, streak) {
@@ -100,6 +107,7 @@ const Game = () => {
 
   const [leaderboard, setLeaderboard] = useState([]);
 
+
   async function fetchLeaderboard() {
     try {
       const data = await getLeaderBoard();  // Awaiting async function
@@ -109,6 +117,14 @@ const Game = () => {
       console.error("Error fetching leaderboard:", error);
       setLeaderboard([]);
     }
+
+async function fetchLeaderboard() {
+  try {
+    const data = await getLeaderBoard();  // Awaiting async function
+    setLeaderboard(data);
+  } catch (error) {
+    setLeaderboard([]);
+
   }
 
   useEffect(() => {
@@ -270,6 +286,7 @@ const Game = () => {
 
   return (  
     <>
+
     {showInstructions && (
       <div className="fixed inset-0 z-50 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 w-full h-full flex flex-col items-center justify-center">
         <div className="bg-yellow-50 rounded shadow-md p-6 max-w-xl relative">
@@ -290,10 +307,163 @@ const Game = () => {
               alt="Instructions Guide"
               className="w-full max-w-xs rounded-md border border-yellow-400 shadow"
             />
-          </div>
+=======
+    <nav className="bg-blue-600 text-white shadow-lg">
+  <div className="max-w-6xl mx-auto px-4">
+    <div className="flex justify-between">
+      <div className="flex space-x-4">
+        <div className="flex items-center py-4">
+          <span className="font-bold text-xl">Guess The Player</span>
         </div>
       </div>
-    )}
+      
+      {/* Mobile menu button */}
+      <div className="md:hidden flex items-center">
+        <button onClick={() => setIsNavOpen(!isNavOpen)} className="mobile-menu-button p-2 focus:outline-none">
+          {isNavOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+      
+      {/* Desktop nav */}
+      <div className="hidden md:flex items-center space-x-1">
+        <button 
+          onClick={() => { closeAllModals(); }}
+          className="py-2 px-4 text-white hover:bg-blue-700 rounded flex items-center"
+        >
+          <Home size={20} className="mr-1" /> Home
+        </button>
+        <button 
+          onClick={() => { closeAllModals(); setShowInstructions(true); }}
+          className="py-2 px-4 text-white hover:bg-blue-700 rounded flex items-center"
+        >
+          <HelpCircle size={20} className="mr-1" /> How to Play
+        </button>
+        <button 
+          onClick={() => { closeAllModals(); setShowLeaderboard(true); }}
+          className="py-2 px-4 text-white hover:bg-blue-700 rounded flex items-center"
+        >
+          <Trophy size={20} className="mr-1" /> Leaderboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {/* Mobile menu */}
+  <div className={`md:hidden ${isNavOpen ? 'block' : 'hidden'}`}>
+    <button 
+      onClick={() => { closeAllModals(); }}
+      className="block py-2 px-4 text-white w-full text-left hover:bg-blue-700"
+    >
+      <div className="flex items-center">
+        <Home size={20} className="mr-2" /> Home
+      </div>
+    </button>
+    <button 
+      onClick={() => { closeAllModals(); setShowInstructions(true); }}
+      className="block py-2 px-4 text-white w-full text-left hover:bg-blue-700"
+    >
+      <div className="flex items-center">
+        <HelpCircle size={20} className="mr-2" /> How to Play
+      </div>
+    </button>
+    <button 
+      onClick={() => { closeAllModals(); setShowLeaderboard(true); }}
+      className="block py-2 px-4 text-white w-full text-left hover:bg-blue-700"
+    >
+      <div className="flex items-center">
+        <Trophy size={20} className="mr-2" /> Leaderboard
+      </div>
+    </button>
+  </div>
+</nav>
+    
+{showInstructions && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50" 
+            onClick={() => setShowInstructions(false)}
+          />
+          
+          <div className="bg-white rounded-lg shadow-xl max-w-xl w-full p-6 relative my-8 max-h-screen overflow-y-auto z-10">
+            <button 
+              onClick={() => setShowInstructions(false)} 
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 bg-white rounded-full p-1" 
+              aria-label="Close"
+            >
+              <X size={24} />
+            </button>
+            
+            <h2 className="text-2xl font-bold mb-4 text-blue-600 pr-8">How to Play</h2>
+            
+            <div className="space-y-4">
+              <p className="text-gray-700">
+                Guess the player based on the teams they played for each year. You have 3 chances and optional hints.
+              </p>
+              
+              <p className="text-gray-700">
+                Each hint unlocks after a guess. After the 2nd hint, you can click on any team to view the squad, but only for one team.
+              </p>
+              
+              <p className="text-gray-700">
+                Click "Skip" if you're stuck or need to move to the next player.
+              </p>
+              
+              <div className="flex justify-center mt-4">
+                <img src="/logos/intro.png" alt="Instructions Guide" className="w-full max-w-md rounded-md border border-gray-300 shadow" />
+              </div>
+              
+              <div className="pt-6 flex justify-center">
+                <button 
+                  onClick={() => setShowInstructions(false)} 
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Got it!
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+{/* ===== LEADERBOARD MODAL ===== */}
+{showLeaderboard && (
+  <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
+      <button
+        onClick={() => setShowLeaderboard(false)}
+        className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+      >
+        <X size={24} />
+      </button>
+      <h2 className="text-2xl font-bold mb-4 text-blue-600 flex items-center">
+        <Trophy size={24} className="mr-2" /> Leaderboard
+      </h2>
+      <div className="space-y-2">
+        {leaderboard.length > 0 ? (
+          leaderboard.map((entry, index) => (
+            <div
+              key={index}
+              className={`flex justify-between items-center p-3 rounded-lg ${
+                entry.deviceId === deviceId 
+                ? 'bg-blue-100 border-l-4 border-blue-500' 
+                : 'bg-gray-100 hover:bg-gray-200'
+              } transition`}
+            >
+              <div className="flex items-center">
+                <span className="text-gray-800 font-medium mr-2">#{index + 1}</span>
+                <span className={`font-medium ${entry.deviceId === deviceId ? 'text-blue-600 font-bold' : 'text-gray-700'}`}>
+                  {entry.name}
+                </span>
+              </div>
+              <span className="text-blue-600 font-bold">{entry.highScore}</span>
+            </div>
+          ))
+        ) : (
+          <p className="text-center text-gray-500">No scores recorded yet</p>
+        )}
+      </div>
+    </div>
+  </div>
+)}
 
     <div className={`${showInstructions ? 'blur-sm pointer-events-none select-none' : ''}`}>
       {/* Your main game content here */}
@@ -469,42 +639,46 @@ const Game = () => {
       </div>
       <div ref={bottomRef} />
 
-      {/* Leaderboard Sidebar */}
-      <div>
-        {/* Toggle Button */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="fixed top-1/2 right-0 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-l-md shadow-lg z-50"
-        >
-          {isOpen ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-        </button>
 
-        {/* Sidebar Container */}
-        <div
-          className={`fixed top-0 right-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 z-40 ${
-            isOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
-          <div className="p-4 max-w-md mx-auto space-y-4">
-            <h2 className="text-2xl font-bold text-center text-gray-800">Leaderboard</h2>
-            {leaderboard.map((entry, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
-              >
-                <span
-                  className={`text-gray-700 font-medium ${
-                    entry.deviceId === deviceId ? "text-green-500" : ""
-                  }`}
-                >
-                  {entry.name}
-                </span>
-                <span className="text-blue-600 font-bold">{entry.highScore}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* Leaderboard Sidebar */}
+  
+
+      {hintData.Nationality && (
+        <p className="text-center mb-1 text-sm text-gray-700 ">
+          <strong>Nationality:</strong> {hintData.Nationality}
+        </p>
+      )}
+      {hintData.Role && (
+        <p className="text-center text-sm text-gray-700 ">
+          <strong>Role:</strong> {hintData.Role}
+        </p>
+      )}
+
+      {message && (
+        <div className="mt-6 text-lg font-medium text-center text-red-600 ">{message}</div>
+      )}
+    </div>
+    <div ref={bottomRef} />
+      {/* <div className="p-4 max-w-md mx-auto bg-white rounded-2xl shadow-md space-y-4">
+  <h2 className="text-2xl font-bold text-center text-gray-800">Leaderboard</h2>
+  {leaderboard.map((entry, index) => (
+    <div
+      key={index}
+      className="flex justify-between items-center p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+    >
+      <span
+        className={`text-gray-700 font-medium ${entry.deviceId === deviceId ? 'text-green-500' : ''}`}
+      >
+        {entry.name}
+      </span>
+      <span className="text-blue-600 font-bold">{entry.highScore}</span>
+    </div>
+  ))}
+</div> */}
+
+      
+
+
     </div>
     </>
   );
