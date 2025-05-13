@@ -20,7 +20,7 @@ const LogoCard = ({ team, year, attempts, isSelected, selectionMade, onSelect })
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/players/squad', {
+      const response = await axios.post('https://iplguesser.onrender.com/api/players/squad', {
         team,
         year,
       });
