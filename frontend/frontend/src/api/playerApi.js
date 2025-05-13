@@ -9,7 +9,7 @@ const API_URL = 'https://iplguesser.onrender.com/api/players';
 
 export const getRandomPlayer = async (difficulty) => {
   const query = difficulty ? `?difficulty=${encodeURIComponent(difficulty)}` : '';
-  const { data } = await axios.get(`${API_URL}random${query}`);
+  const { data } = await axios.get(`${API_URL}/random${query}`);
   return data;
 };
 
