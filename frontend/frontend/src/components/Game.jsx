@@ -1,15 +1,24 @@
-import { useEffect, useState } from 'react';
-import { getRandomPlayer, checkPlayerGuess, getHint , leaderBoardUpdate ,getLeaderBoard  } from '../api/playerApi';
-import Autosuggest from 'react-autosuggest';
-import LogoCard from './LogoCard';
-import GuessInput from './GuessInput';
-import playerNames from '../players/players.json';
-import confetti from 'canvas-confetti';
-import { useRef } from 'react';
-import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react";
-import { Menu, X, HelpCircle, Trophy, Home } from "lucide-react";
-
-
+import { useEffect, useState } from "react";
+import {
+  getRandomPlayer,
+  checkPlayerGuess,
+  getHint,
+  leaderBoardUpdate,
+  getLeaderBoard,
+} from "../api/playerApi";
+import Autosuggest from "react-autosuggest";
+import LogoCard from "./LogoCard";
+import GuessInput from "./GuessInput";
+import playerNames from "../players/players.json";
+import confetti from "canvas-confetti";
+import { useRef } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
+import { Menu, X, HelpCircle, Trophy, Home, Settings } from "lucide-react";
 
 function launchConfetti() {
   confetti({
@@ -30,32 +39,32 @@ const Game = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [player, setPlayer] = useState(null);
   const [showInstructions, setShowInstructions] = useState(false);
-  const [guess, setGuess] = useState('');
+  const [guess, setGuess] = useState("");
   const [attemptsLeft, setAttemptsLeft] = useState(3);
   const [showNextButton, setShowNextButton] = useState(false);
   const [showSkipButton, setShowSkipButton] = useState(true);
-  const [message, setMessage] = useState('');
-  const [suggestions, setSuggestions] = useState([]); 
+  const [message, setMessage] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
   const [streak, setStreak] = useState(0);
-  const [nationality, setNationality] = useState('');
-  const [role, setRole] = useState('');
+  const [nationality, setNationality] = useState("");
+  const [role, setRole] = useState("");
   const [hintButton, setHintButton] = useState(false);
   const [hintCount, setHintCount] = useState(0); // 0: no hints, 1: nationality, 2: both
-  const [hintData, setHintData] = useState({ Nationality: '', Role: '' });
+  const [hintData, setHintData] = useState({ Nationality: "", Role: "" });
   const [attemptsmade, setAttemptsmade] = useState(0);
-  const [points , setPoints] = useState(0);
+  const [points, setPoints] = useState(0);
   const [selectedCardKey, setSelectedCardKey] = useState(null);
   const [countdown, setCountdown] = useState(30);
   const [isTimed, setIsTimed] = useState(false); // true = timed mode
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const [difficulty, setDifficulty] = useState('random');
-  const [showDifficultySelector, setShowDifficultySelector] = useState(true);
-
-
+  const [difficulty, setDifficulty] = useState("random");
+  const [showDifficultySelector, setShowDifficultySelector] = useState(false);
+  const [showDifficultyModal, setShowDifficultyModal] = useState(false);
   const closeAllModals = () => {
     setShowInstructions(false);
     setShowLeaderboard(false);
+    setShowDifficultyModal(false);
     setIsNavOpen(false);
   };
 
@@ -70,11 +79,11 @@ const Game = () => {
   };
 
   const fetchNewPlayer = async () => {
-     const query = difficulty === 'random' ? undefined : difficulty;
+    const query = difficulty === 'random' ? undefined : difficulty;
     let playerdata = null;
-
+  
     try {
-      console.log("Difficulty is : ",query);
+      console.log("Difficulty is : ", query);
       playerdata = await getRandomPlayer(query);
     } catch (error) {
       console.error(error);
@@ -94,6 +103,7 @@ const Game = () => {
     setHintData({ Nationality: '', Role: '' });
     setAttemptsmade(0);
     setSelectedCardKey(null);
+    setShowDifficultySelector(false); // Make sure this is set to false
     fetchLeaderboard();
   };
 
@@ -104,29 +114,25 @@ const Game = () => {
   }
 
   // Correct async function definition
-async function submitScore(deviceId, streak) {
-  try {
-    await leaderBoardUpdate(deviceId, streak);  // Awaiting async function
-    console.log("Score submitted successfully.");
-  } catch (error) {
-    console.error("Error submitting score:", error);
+  async function submitScore(deviceId, streak) {
+    try {
+      await leaderBoardUpdate(deviceId, streak); // Awaiting async function
+      console.log("Score submitted successfully.");
+    } catch (error) {
+      console.error("Error submitting score:", error);
+    }
   }
-}
 
-const [leaderboard, setLeaderboard] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
 
-async function fetchLeaderboard() {
-  try {
-    const data = await getLeaderBoard();  // Awaiting async function
-    setLeaderboard(data);
-  } catch (error) {
-    setLeaderboard([]);
+  async function fetchLeaderboard() {
+    try {
+      const data = await getLeaderBoard(); // Awaiting async function
+      setLeaderboard(data);
+    } catch (error) {
+      setLeaderboard([]);
+    }
   }
-}
-
-
-
-
 
   useEffect(() => {
     fetchLeaderboard();
@@ -134,48 +140,48 @@ async function fetchLeaderboard() {
   }, []);
 
   useEffect(() => {
-  if (!player || !isTimed) return;
+    if (!player || !isTimed) return;
 
-  const timeOverTimer = setTimeout(() => {
-    setMessage('😔 Time over! Correct answer was: ' + player.name);
+    const timeOverTimer = setTimeout(() => {
+      setMessage("😔 Time over! Correct answer was: " + player.name);
 
-    const nextPlayerTimer = setTimeout(() => {
-      fetchNewPlayer();
-    }, 5000);
+      const nextPlayerTimer = setTimeout(() => {
+        fetchNewPlayer();
+      }, 5000);
 
-    return () => clearTimeout(nextPlayerTimer);
-  }, 30000);
+      return () => clearTimeout(nextPlayerTimer);
+    }, 30000);
 
-  return () => clearTimeout(timeOverTimer);
-}, [player, isTimed]);
+    return () => clearTimeout(timeOverTimer);
+  }, [player, isTimed]);
 
-useEffect(() => {
-  if (!player || !isTimed) return;
+  useEffect(() => {
+    if (!player || !isTimed) return;
 
-  setCountdown(30);
+    setCountdown(30);
 
-  const interval = setInterval(() => {
-    setCountdown((prev) => {
-      if (prev <= 1) {
-        clearInterval(interval);
-        return 0;
-      }
-      return prev - 1;
-    });
-  }, 1000); // should be 1000ms for 1-second countdown
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000); // should be 1000ms for 1-second countdown
 
-  return () => clearInterval(interval);
-}, [player, isTimed]);
+    return () => clearInterval(interval);
+  }, [player, isTimed]);
 
   const handleGuess = async () => {
     if (!guess.trim()) return;
     setAttemptsmade(attemptsmade + 1);
 
     const data = await checkPlayerGuess(player._id, guess);
-    
+
     if (data.correct) {
       launchConfetti();
-      setMessage('🎯 Correct! Moving to next player...');
+      setMessage("🎯 Correct! Moving to next player...");
       const newStreak = streak + 1;
       setStreak(newStreak);
       submitScore(deviceId, newStreak);
@@ -183,65 +189,63 @@ useEffect(() => {
       fetchLeaderboard();
       setTimeout(fetchNewPlayer, 2000);
 
-      if(attemptsmade == 0){
+      if (attemptsmade == 0) {
         setPoints(points + 10);
       }
-      if(attemptsmade==1){
-        setPoints(points + 7)
+      if (attemptsmade == 1) {
+        setPoints(points + 7);
       }
-      if(attemptsmade==2){
-        setPoints(points+5);
+      if (attemptsmade == 2) {
+        setPoints(points + 5);
       }
-
-
     } else {
       if (attemptsLeft > 1) {
-        setAttemptsmade(attemptsmade+1);
+        setAttemptsmade(attemptsmade + 1);
         setAttemptsLeft(attemptsLeft - 1);
         setMessage(`❌ Incorrect! Attempts left: ${attemptsLeft - 1}`);
-        
+
         // Enable hint button after first incorrect guess
         if (hintCount < 2) {
           setHintButton(true);
         }
       } else {
-        setMessage('😔 Chances over! Correct answer was: ' + player.name);
+        setMessage("😔 Chances over! Correct answer was: " + player.name);
         setShowSkipButton(false);
         setShowNextButton(true);
-        submitScore(deviceId,streak);
+        submitScore(deviceId, streak);
         setStreak(0);
         setAttemptsmade(0);
         setHintButton(false);
         setPoints(0);
       }
     }
-    setGuess('');
+    setGuess("");
   };
 
   const handleHint = async () => {
     const data = await getHint(player.name);
-    
+
     // First hint shows nationality
     if (hintCount === 0) {
       setNationality(data.Nationality);
-      setHintData(prev => ({ ...prev, Nationality: data.Nationality }));
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+      setHintData((prev) => ({ ...prev, Nationality: data.Nationality }));
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
       setHintCount(1);
     }
     // Second hint shows role
     else if (hintCount === 1 && attemptsmade > 1) {
       setRole(data.Role);
-      setHintData(prev => ({ ...prev, Role: data.Role }));
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+      setHintData((prev) => ({ ...prev, Role: data.Role }));
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
       setHintCount(2);
     }
   };
 
   const onSuggestionsFetchRequested = ({ value }) => {
-    const filteredNames = playerNames.filter(name =>
+    const filteredNames = playerNames.filter((name) =>
       name.toLowerCase().includes(value.toLowerCase())
     );
-    setSuggestions(filteredNames.slice(0, 5));  // Slice to get top 5 suggestions
+    setSuggestions(filteredNames.slice(0, 5)); // Slice to get top 5 suggestions
   };
 
   const onSuggestionSelected = (event, { suggestion }) => {
@@ -253,11 +257,11 @@ useEffect(() => {
   };
 
   const inputProps = {
-    placeholder: 'Type player name...',
+    placeholder: "Type player name...",
     value: guess,
     onChange: (event, { newValue }) => setGuess(newValue),
     className:
-    'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5 ',
+      "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5 ",
   };
 
   const handleNextPlayer = () => {
@@ -269,122 +273,221 @@ useEffect(() => {
 
   const sortedYears = Object.keys(player.career).sort((a, b) => a - b);
 
-  function showAnswer(){
+  function showAnswer() {
     setMessage("The correct player was: " + player.name);
     setTimeout(fetchNewPlayer, 2000);
-    submitScore(deviceId,streak);
+    submitScore(deviceId, streak);
     setStreak(0);
   }
 
-  return (  
+  return (
     <>
-    <nav className="bg-blue-600 text-white shadow-lg">
-  <div className="max-w-6xl mx-auto px-4">
-    <div className="flex justify-between">
-      <div className="flex space-x-4">
-        <div className="flex items-center py-4">
-          <span className="font-bold text-xl">Guess The Player</span>
+      <nav className="bg-blue-600 text-white shadow-lg">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex justify-between">
+            <div className="flex space-x-4">
+              <div className="flex items-center py-4">
+                <span className="font-bold text-xl">Guess The Player</span>
+              </div>
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={() => setIsNavOpen(!isNavOpen)}
+                className="mobile-menu-button p-2 focus:outline-none"
+              >
+                {isNavOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
+
+            {/* Desktop nav */}
+            <div className="hidden md:flex items-center space-x-1">
+              <button
+                onClick={() => {
+                  closeAllModals();
+                }}
+                className="py-2 px-4 text-white hover:bg-blue-700 rounded flex items-center"
+              >
+                <Home size={20} className="mr-1" /> Home
+              </button>
+              <button
+                onClick={() => {
+                  closeAllModals();
+                  setShowInstructions(true);
+                }}
+                className="py-2 px-4 text-white hover:bg-blue-700 rounded flex items-center"
+              >
+                <HelpCircle size={20} className="mr-1" /> How to Play
+              </button>
+              <button
+                onClick={() => {
+                  closeAllModals();
+                  setShowDifficultyModal(true);
+                }}
+                className="py-2 px-4 text-white hover:bg-blue-700 rounded flex items-center"
+              >
+                <Settings size={20} className="mr-1" /> Difficulty
+              </button>
+              <button
+                onClick={() => {
+                  closeAllModals();
+                  setShowLeaderboard(true);
+                }}
+                className="py-2 px-4 text-white hover:bg-blue-700 rounded flex items-center"
+              >
+                <Trophy size={20} className="mr-1" /> Leaderboard
+              </button>
+            </div>
+          </div>
         </div>
+
+        {/* Mobile menu */}
+        <div className={`md:hidden ${isNavOpen ? "block" : "hidden"}`}>
+          <button
+            onClick={() => {
+              closeAllModals();
+            }}
+            className="block py-2 px-4 text-white w-full text-left hover:bg-blue-700"
+          >
+            <div className="flex items-center">
+              <Home size={20} className="mr-2" /> Home
+            </div>
+          </button>
+          <button
+            onClick={() => {
+              closeAllModals();
+              setShowInstructions(true);
+            }}
+            className="block py-2 px-4 text-white w-full text-left hover:bg-blue-700"
+          >
+            <div className="flex items-center">
+              <HelpCircle size={20} className="mr-2" /> How to Play
+            </div>
+          </button>
+          <button
+            onClick={() => {
+              closeAllModals();
+              setShowDifficultyModal(true);
+            }}
+            className="block py-2 px-4 text-white w-full text-left hover:bg-blue-700"
+          >
+            <div className="flex items-center">
+              <Settings size={20} className="mr-2" /> Difficulty
+            </div>
+          </button>
+          <button
+            onClick={() => {
+              closeAllModals();
+              setShowLeaderboard(true);
+            }}
+            className="block py-2 px-4 text-white w-full text-left hover:bg-blue-700"
+          >
+            <div className="flex items-center">
+              <Trophy size={20} className="mr-2" /> Leaderboard
+            </div>
+          </button>
+        </div>
+      </nav>
+      {showDifficultyModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50" 
+      onClick={() => setShowDifficultyModal(false)}
+    />
+    
+    <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative z-10">
+      <button 
+        onClick={() => setShowDifficultyModal(false)} 
+        className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+      >
+        <X size={24} />
+      </button>
+      
+      <h2 className="text-2xl font-bold mb-4 text-blue-600 flex items-center">
+        <Settings size={24} className="mr-2" /> Difficulty Settings
+      </h2>
+      
+      <div className="mb-6">
+        <p className="text-gray-700 mb-2">Select the difficulty level:</p>
+        <select 
+          value={difficulty} 
+          onChange={handleDifficultyChange}
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="random">Random</option>
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="difficult">Difficult</option>
+        </select>
       </div>
       
-      {/* Mobile menu button */}
-      <div className="md:hidden flex items-center">
-        <button onClick={() => setIsNavOpen(!isNavOpen)} className="mobile-menu-button p-2 focus:outline-none">
-          {isNavOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
-      
-      {/* Desktop nav */}
-      <div className="hidden md:flex items-center space-x-1">
+      <div className="flex justify-end space-x-3">
         <button 
-          onClick={() => { closeAllModals(); }}
-          className="py-2 px-4 text-white hover:bg-blue-700 rounded flex items-center"
+          onClick={() => setShowDifficultyModal(false)}
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
         >
-          <Home size={20} className="mr-1" /> Home
+          Cancel
         </button>
         <button 
-          onClick={() => { closeAllModals(); setShowInstructions(true); }}
-          className="py-2 px-4 text-white hover:bg-blue-700 rounded flex items-center"
+          onClick={() => {
+            setShowDifficultyModal(false);
+            applyDifficultyAndFetch();
+          }}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          <HelpCircle size={20} className="mr-1" /> How to Play
-        </button>
-        <button 
-          onClick={() => { closeAllModals(); setShowLeaderboard(true); }}
-          className="py-2 px-4 text-white hover:bg-blue-700 rounded flex items-center"
-        >
-          <Trophy size={20} className="mr-1" /> Leaderboard
+          Apply & New Player
         </button>
       </div>
     </div>
   </div>
-
-  {/* Mobile menu */}
-  <div className={`md:hidden ${isNavOpen ? 'block' : 'hidden'}`}>
-    <button 
-      onClick={() => { closeAllModals(); }}
-      className="block py-2 px-4 text-white w-full text-left hover:bg-blue-700"
-    >
-      <div className="flex items-center">
-        <Home size={20} className="mr-2" /> Home
-      </div>
-    </button>
-    <button 
-      onClick={() => { closeAllModals(); setShowInstructions(true); }}
-      className="block py-2 px-4 text-white w-full text-left hover:bg-blue-700"
-    >
-      <div className="flex items-center">
-        <HelpCircle size={20} className="mr-2" /> How to Play
-      </div>
-    </button>
-    <button 
-      onClick={() => { closeAllModals(); setShowLeaderboard(true); }}
-      className="block py-2 px-4 text-white w-full text-left hover:bg-blue-700"
-    >
-      <div className="flex items-center">
-        <Trophy size={20} className="mr-2" /> Leaderboard
-      </div>
-    </button>
-  </div>
-</nav>
-    
-{showInstructions && (
+)}
+      {showInstructions && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50" 
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50"
             onClick={() => setShowInstructions(false)}
           />
-          
+
           <div className="bg-white rounded-lg shadow-xl max-w-xl w-full p-6 relative my-8 max-h-screen overflow-y-auto z-10">
-            <button 
-              onClick={() => setShowInstructions(false)} 
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 bg-white rounded-full p-1" 
+            <button
+              onClick={() => setShowInstructions(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 bg-white rounded-full p-1"
               aria-label="Close"
             >
               <X size={24} />
             </button>
-            
-            <h2 className="text-2xl font-bold mb-4 text-blue-600 pr-8">How to Play</h2>
-            
+
+            <h2 className="text-2xl font-bold mb-4 text-blue-600 pr-8">
+              How to Play
+            </h2>
+
             <div className="space-y-4">
               <p className="text-gray-700">
-                Guess the player based on the teams they played for each year. You have 3 chances and optional hints.
+                Guess the player based on the teams they played for each year.
+                You have 3 chances and optional hints.
               </p>
-              
+
               <p className="text-gray-700">
-                Each hint unlocks after a guess. After the 2nd hint, you can click on any team to view the squad, but only for one team.
+                Each hint unlocks after a guess. After the 2nd hint, you can
+                click on any team to view the squad, but only for one team.
               </p>
-              
+
               <p className="text-gray-700">
                 Click "Skip" if you're stuck or need to move to the next player.
               </p>
-              
+
               <div className="flex justify-center mt-4">
-                <img src="/logos/intro.png" alt="Instructions Guide" className="w-full max-w-md rounded-md border border-gray-300 shadow" />
+                <img
+                  src="/logos/intro.png"
+                  alt="Instructions Guide"
+                  className="w-full max-w-md rounded-md border border-gray-300 shadow"
+                />
               </div>
-              
+
               <div className="pt-6 flex justify-center">
-                <button 
-                  onClick={() => setShowInstructions(false)} 
+                <button
+                  onClick={() => setShowInstructions(false)}
                   className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
                   Got it!
@@ -394,86 +497,104 @@ useEffect(() => {
           </div>
         </div>
       )}
-{/* ===== LEADERBOARD MODAL ===== */}
-{showLeaderboard && (
-  <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-    <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
-      <button
-        onClick={() => setShowLeaderboard(false)}
-        className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-      >
-        <X size={24} />
-      </button>
-      <h2 className="text-2xl font-bold mb-4 text-blue-600 flex items-center">
-        <Trophy size={24} className="mr-2" /> Leaderboard
-      </h2>
-      <div className="space-y-2">
-        {leaderboard.length > 0 ? (
-          leaderboard.map((entry, index) => (
-            <div
-              key={index}
-              className={`flex justify-between items-center p-3 rounded-lg ${
-                entry.deviceId === deviceId 
-                ? 'bg-blue-100 border-l-4 border-blue-500' 
-                : 'bg-gray-100 hover:bg-gray-200'
-              } transition`}
+      {/* ===== LEADERBOARD MODAL ===== */}
+      {showLeaderboard && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative">
+            <button
+              onClick={() => setShowLeaderboard(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
             >
-              <div className="flex items-center">
-                <span className="text-gray-800 font-medium mr-2">#{index + 1}</span>
-                <span className={`font-medium ${entry.deviceId === deviceId ? 'text-blue-600 font-bold' : 'text-gray-700'}`}>
-                  {entry.name}
-                </span>
-              </div>
-              <span className="text-blue-600 font-bold">{entry.highScore}</span>
+              <X size={24} />
+            </button>
+            <h2 className="text-2xl font-bold mb-4 text-blue-600 flex items-center">
+              <Trophy size={24} className="mr-2" /> Leaderboard
+            </h2>
+            <div className="space-y-2">
+              {leaderboard.length > 0 ? (
+                leaderboard.map((entry, index) => (
+                  <div
+                    key={index}
+                    className={`flex justify-between items-center p-3 rounded-lg ${
+                      entry.deviceId === deviceId
+                        ? "bg-blue-100 border-l-4 border-blue-500"
+                        : "bg-gray-100 hover:bg-gray-200"
+                    } transition`}
+                  >
+                    <div className="flex items-center">
+                      <span className="text-gray-800 font-medium mr-2">
+                        #{index + 1}
+                      </span>
+                      <span
+                        className={`font-medium ${
+                          entry.deviceId === deviceId
+                            ? "text-blue-600 font-bold"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {entry.name}
+                      </span>
+                    </div>
+                    <span className="text-blue-600 font-bold">
+                      {entry.highScore}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-gray-500">
+                  No scores recorded yet
+                </p>
+              )}
             </div>
-          ))
-        ) : (
-          <p className="text-center text-gray-500">No scores recorded yet</p>
-        )}
-      </div>
-    </div>
-  </div>
-)}
-
-    
-    <div className={`${showInstructions ? 'blur-sm pointer-events-none select-none' : ''}`}>
-      {/* Your main game content here */}
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50  px-4 py-10">
-      
-      <h2 className="text-2xl font-bold mb-2 text-green-700 font-mono text-center">
-        🔥 Max Streak: <span className="text-black">{streak}</span>
-      </h2>
-
-      <h3 className="text-xl font-semibold text-purple-700 font-serif mb-6 text-center">
-        🎯 Score: <span className="text-black ">{points}</span>
-      </h3>
-
-      <div className="mb-4 flex justify-center">
-        <label className="flex items-center cursor-pointer text-md font-medium text-gray-700">
-          <span className="mr-3">{isTimed ? '⏱ Timed Mode' : '🧘‍♂️ Untimed Mode'}</span>
-          <div className="relative">
-            <input
-              type="checkbox"
-              checked={isTimed}
-              onChange={() => setIsTimed(!isTimed)}
-              className="sr-only"
-            />
-            <div className="w-12 h-6 bg-gray-300 rounded-full shadow-inner transition duration-300"></div>
-            <div
-              className={`dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition transform duration-300 ease-in-out ${
-                isTimed ? 'translate-x-6 bg-green-400' : 'bg-red-400'
-              }`}
-            ></div>
           </div>
-        </label>
-      </div>
+        </div>
+      )}
 
-      {showDifficultySelector && (
+      <div
+        className={`${
+          showInstructions ? "blur-sm pointer-events-none select-none" : ""
+        }`}
+      >
+        {/* Your main game content here */}
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50  px-4 py-10">
+          <h2 className="text-2xl font-bold mb-2 text-green-700 font-mono text-center">
+            🔥 Max Streak: <span className="text-black">{streak}</span>
+          </h2>
+
+          <h3 className="text-xl font-semibold text-purple-700 font-serif mb-6 text-center">
+            🎯 Score: <span className="text-black ">{points}</span>
+          </h3>
+
+          <div className="mb-4 flex justify-center">
+            <label className="flex items-center cursor-pointer text-md font-medium text-gray-700">
+              <span className="mr-3">
+                {isTimed ? "⏱ Timed Mode" : "🧘‍♂️ Untimed Mode"}
+              </span>
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={isTimed}
+                  onChange={() => setIsTimed(!isTimed)}
+                  className="sr-only"
+                />
+                <div className="w-12 h-6 bg-gray-300 rounded-full shadow-inner transition duration-300"></div>
+                <div
+                  className={`dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition transform duration-300 ease-in-out ${
+                    isTimed ? "translate-x-6 bg-green-400" : "bg-red-400"
+                  }`}
+                ></div>
+              </div>
+            </label>
+          </div>
+
+          {showDifficultySelector && (
             <div className="mt-2 p-4 bg-white rounded-lg shadow-md">
               <div className="mb-3">
-                <p className="text-sm text-gray-700 mb-2">Select difficulty level:</p>
-                <select 
-                  value={difficulty} 
+                <p className="text-sm text-gray-700 mb-2">
+                  Select difficulty level:
+                </p>
+                <select
+                  value={difficulty}
                   onChange={handleDifficultyChange}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 >
@@ -484,13 +605,13 @@ useEffect(() => {
                 </select>
               </div>
               <div className="flex justify-between">
-                <button 
+                <button
                   onClick={() => setShowDifficultySelector(false)}
                   className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   onClick={applyDifficultyAndFetch}
                   className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
                 >
@@ -499,99 +620,98 @@ useEffect(() => {
               </div>
             </div>
           )}
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
+            {sortedYears.map((year) => {
+              const key = `${player.career[year]}-${year}`;
+              return (
+                <LogoCard
+                  key={key}
+                  team={player.career[year]}
+                  year={year}
+                  attempts={attemptsmade}
+                  isSelected={selectedCardKey === key}
+                  selectionMade={selectedCardKey !== null}
+                  onSelect={() => setSelectedCardKey(key)}
+                />
+              );
+            })}
+          </div>
 
-      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 ">Guess the Player</h1>
-      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
-        {sortedYears.map((year) => {
-          const key = `${player.career[year]}-${year}`;
-          return (
-            <LogoCard
-              key={key}
-              team={player.career[year]}
-              year={year}
-              attempts={attemptsmade}
-              isSelected={selectedCardKey === key}
-              selectionMade={selectedCardKey !== null}
-              onSelect={() => setSelectedCardKey(key)}
+          {isTimed && (
+            <p className="text-center text-md font-semibold text-gray-600 mb-4">
+              ⏳ Time left: <span className="text-black">{countdown}</span>{" "}
+              seconds
+            </p>
+          )}
+
+          {/* Autosuggest input */}
+          <div className="mb-6 w-full max-w-sm">
+            <Autosuggest
+              suggestions={suggestions}
+              onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+              onSuggestionsClearRequested={onSuggestionsClearRequested}
+              getSuggestionValue={(suggestion) => suggestion}
+              renderSuggestion={(suggestion) => <div>{suggestion}</div>}
+              onSuggestionSelected={onSuggestionSelected}
+              inputProps={inputProps}
             />
-          );
-        })}
-      </div>
+          </div>
 
-       {isTimed && (
-          <p className="text-center text-md font-semibold text-gray-600 mb-4">
-            ⏳ Time left: <span className="text-black">{countdown}</span> seconds
-          </p>
-        )}
-  
+          <div className="flex flex-wrap gap-4 justify-center items-center mb-6">
+            <button
+              onClick={handleGuess}
+              className="px-6 py-3 bg-green-600 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-green-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-300"
+            >
+              Guess
+            </button>
 
+            {showSkipButton && (
+              <button
+                onClick={showAnswer}
+                className="px-6 py-3 bg-gray-600 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-gray-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-300"
+              >
+                Skip
+              </button>
+            )}
 
-      {/* Autosuggest input */}
-      <div className="mb-6 w-full max-w-sm">
-        <Autosuggest
-          suggestions={suggestions}
-          onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-          onSuggestionsClearRequested={onSuggestionsClearRequested}
-          getSuggestionValue={(suggestion) => suggestion}
-          renderSuggestion={(suggestion) => <div>{suggestion}</div>}
-          onSuggestionSelected={onSuggestionSelected}
-          inputProps={inputProps}
-        />
-      </div>
-  
-      <div className="flex flex-wrap gap-4 justify-center items-center mb-6">
-        <button
-          onClick={handleGuess}
-          className="px-6 py-3 bg-green-600 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-green-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-300"
-        >
-          Guess
-        </button>
+            {showNextButton && (
+              <button
+                onClick={handleNextPlayer}
+                className="px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-blue-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              >
+                Next Player
+              </button>
+            )}
 
-        {showSkipButton && (
-          <button
-            onClick={showAnswer}
-            className="px-6 py-3 bg-gray-600 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-gray-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-300"
-          >
-            Skip
-          </button>
-        )}
+            {hintButton && (
+              <button
+                onClick={handleHint}
+                className="px-6 py-3 bg-yellow-500 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-yellow-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+              >
+                Show Hint
+              </button>
+            )}
+          </div>
 
-        {showNextButton && (
-          <button
-            onClick={handleNextPlayer}
-            className="px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-blue-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300"
-          >
-            Next Player
-          </button>
-        )}
+          {hintData.Nationality && (
+            <p className="text-center mb-1 text-sm text-gray-700 ">
+              <strong>Nationality:</strong> {hintData.Nationality}
+            </p>
+          )}
+          {hintData.Role && (
+            <p className="text-center text-sm text-gray-700 ">
+              <strong>Role:</strong> {hintData.Role}
+            </p>
+          )}
 
-        {hintButton && (
-          <button
-            onClick={handleHint}
-            className="px-6 py-3 bg-yellow-500 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-yellow-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-yellow-300"
-          >
-            Show Hint
-          </button>
-        )}
-      </div>
-
-      {hintData.Nationality && (
-        <p className="text-center mb-1 text-sm text-gray-700 ">
-          <strong>Nationality:</strong> {hintData.Nationality}
-        </p>
-      )}
-      {hintData.Role && (
-        <p className="text-center text-sm text-gray-700 ">
-          <strong>Role:</strong> {hintData.Role}
-        </p>
-      )}
-
-      {message && (
-        <div className="mt-6 text-lg font-medium text-center text-red-600 ">{message}</div>
-      )}
-    </div>
-    <div ref={bottomRef} />
-      {/* <div className="p-4 max-w-md mx-auto bg-white rounded-2xl shadow-md space-y-4">
+          {message && (
+            <div className="mt-6 text-lg font-medium text-center text-red-600 ">
+              {message}
+            </div>
+          )}
+        </div>
+        <div ref={bottomRef} />
+        {/* <div className="p-4 max-w-md mx-auto bg-white rounded-2xl shadow-md space-y-4">
   <h2 className="text-2xl font-bold text-center text-gray-800">Leaderboard</h2>
   {leaderboard.map((entry, index) => (
     <div
@@ -607,12 +727,9 @@ useEffect(() => {
     </div>
   ))}
 </div> */}
-
-      
-
-    </div>
+      </div>
     </>
-    );
+  );
 };
 
 export default Game;
