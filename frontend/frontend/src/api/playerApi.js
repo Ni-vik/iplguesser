@@ -4,12 +4,12 @@ const API_URL = 'https://iplguesser.onrender.com/api/players';
 
 export const getRandomPlayer = async (difficulty) => {
   const query = difficulty ? `?difficulty=${encodeURIComponent(difficulty)}` : '';
-  const { data } = await axios.get(`http://localhost:5000/api/players/random${query}`);
+  const { data } = await axios.get(`${API_URL}/random${query}`);
 
-export const getRandomPlayer = async () => {
-  const { data } = await axios.get(`${API_URL}/random`);
-  return data;
-};
+// export const getRandomPlayer = async () => {
+//   const { data } = await axios.get(`${API_URL}/random`);
+//   return data;
+// };
 
 
 export const checkPlayerGuess = async (playerId, guess) => {
