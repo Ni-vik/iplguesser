@@ -18,7 +18,7 @@ import {
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
-import { Menu, X, HelpCircle, Trophy, Home, Settings } from "lucide-react";
+import { Menu, X, HelpCircle, Trophy, Home, Settings, Clock } from "lucide-react";
 
 function launchConfetti() {
   confetti({
@@ -61,10 +61,13 @@ const Game = () => {
   const [difficulty, setDifficulty] = useState("random");
   const [showDifficultySelector, setShowDifficultySelector] = useState(false);
   const [showDifficultyModal, setShowDifficultyModal] = useState(false);
+  const [timeLimit, setTimeLimit] = useState(30); // Default 30 seconds
+  const [showTimerModal, setShowTimerModal] = useState(false);
   const closeAllModals = () => {
     setShowInstructions(false);
     setShowLeaderboard(false);
     setShowDifficultyModal(false);
+    setShowTimerModal(false);
     setIsNavOpen(false);
   };
 
@@ -83,7 +86,7 @@ const Game = () => {
     let playerdata = null;
   
     try {
-      console.log("Difficulty is : ", query);
+      //console.log("Difficulty is : ", query);
       playerdata = await getRandomPlayer(query);
     } catch (error) {
       console.error(error);
@@ -117,7 +120,7 @@ const Game = () => {
   async function submitScore(deviceId, streak) {
     try {
       await leaderBoardUpdate(deviceId, streak); // Awaiting async function
-      console.log("Score submitted successfully.");
+      //console.log("Score submitted successfully.");
     } catch (error) {
       console.error("Error submitting score:", error);
     }
@@ -146,19 +149,20 @@ const Game = () => {
       setMessage("😔 Time over! Correct answer was: " + player.name);
 
       const nextPlayerTimer = setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
         fetchNewPlayer();
       }, 5000);
 
       return () => clearTimeout(nextPlayerTimer);
-    }, 30000);
+    }, timeLimit * 1000);
 
     return () => clearTimeout(timeOverTimer);
-  }, [player, isTimed]);
+  }, [player, isTimed, timeLimit]);
 
   useEffect(() => {
     if (!player || !isTimed) return;
 
-    setCountdown(30);
+    setCountdown(timeLimit);
 
     const interval = setInterval(() => {
       setCountdown((prev) => {
@@ -171,7 +175,7 @@ const Game = () => {
     }, 1000); // should be 1000ms for 1-second countdown
 
     return () => clearInterval(interval);
-  }, [player, isTimed]);
+  }, [player, isTimed, timeLimit]);
 
   const handleGuess = async () => {
     if (!guess.trim()) return;
@@ -181,6 +185,7 @@ const Game = () => {
 
     if (data.correct) {
       launchConfetti();
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
       setMessage("🎯 Correct! Moving to next player...");
       const newStreak = streak + 1;
       setStreak(newStreak);
@@ -210,6 +215,7 @@ const Game = () => {
         }
       } else {
         setMessage("😔 Chances over! Correct answer was: " + player.name);
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
         setShowSkipButton(false);
         setShowNextButton(true);
         submitScore(deviceId, streak);
@@ -269,11 +275,16 @@ const Game = () => {
     fetchLeaderboard();
   };
 
+  const handleTimeLimitChange = (e) => {
+    setTimeLimit(parseInt(e.target.value, 10));
+  };
+
   if (!player) return <div className="text-center mt-10">Loading...</div>;
 
   const sortedYears = Object.keys(player.career).sort((a, b) => a - b);
 
   function showAnswer() {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     setMessage("The correct player was: " + player.name);
     setTimeout(fetchNewPlayer, 2000);
     submitScore(deviceId, streak);
@@ -332,6 +343,15 @@ const Game = () => {
               <button
                 onClick={() => {
                   closeAllModals();
+                  setShowTimerModal(true);
+                }}
+                className="py-2 px-4 text-white hover:bg-blue-700 rounded flex items-center"
+              >
+                <Clock size={20} className="mr-1" /> Timer
+              </button>
+              <button
+                onClick={() => {
+                  closeAllModals();
                   setShowLeaderboard(true);
                 }}
                 className="py-2 px-4 text-white hover:bg-blue-700 rounded flex items-center"
@@ -374,6 +394,17 @@ const Game = () => {
           >
             <div className="flex items-center">
               <Settings size={20} className="mr-2" /> Difficulty
+            </div>
+          </button>
+          <button
+            onClick={() => {
+              closeAllModals();
+              setShowTimerModal(true);
+            }}
+            className="block py-2 px-4 text-white w-full text-left hover:bg-blue-700"
+          >
+            <div className="flex items-center">
+              <Clock size={20} className="mr-2" /> Timer
             </div>
           </button>
           <button
@@ -550,6 +581,102 @@ const Game = () => {
         </div>
       )}
 
+      {showTimerModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50" 
+            onClick={() => setShowTimerModal(false)}
+          />
+          
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative z-10">
+            <button 
+              onClick={() => setShowTimerModal(false)} 
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+            >
+              <X size={24} />
+            </button>
+            
+            <h2 className="text-2xl font-bold mb-4 text-blue-600 flex items-center">
+              <Clock size={24} className="mr-2" /> Timer Settings
+            </h2>
+            
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-gray-700 font-medium">Enable Timer:</span>
+                <label className="flex items-center cursor-pointer">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={isTimed}
+                      onChange={() => setIsTimed(!isTimed)}
+                      className="sr-only"
+                    />
+                    <div className="w-12 h-6 bg-gray-300 rounded-full shadow-inner transition duration-300"></div>
+                    <div
+                      className={`dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition transform duration-300 ease-in-out ${
+                        isTimed ? "translate-x-6 bg-green-400" : "bg-red-400"
+                      }`}
+                    ></div>
+                  </div>
+                  <span className="ml-3 text-gray-700">
+                    {isTimed ? "On" : "Off"}
+                  </span>
+                </label>
+              </div>
+              
+              {isTimed && (
+                <div>
+                  <p className="text-gray-700 mb-2">Set time limit (seconds):</p>
+                  <div className="flex items-center space-x-4">
+                    <input 
+                      type="range" 
+                      min="10" 
+                      max="120" 
+                      step="5"
+                      value={timeLimit}
+                      onChange={handleTimeLimitChange}
+                      className="w-full"
+                    />
+                    <input
+                      type="number"
+                      min="10"
+                      max="120"
+                      value={timeLimit}
+                      onChange={handleTimeLimitChange}
+                      className="w-16 p-2 border border-gray-300 rounded-lg text-center"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Recommended: 30-60 seconds
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex justify-end space-x-3">
+              <button 
+                onClick={() => setShowTimerModal(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  setShowTimerModal(false);
+                  // If you need to reset countdown when settings change
+                  if (isTimed) {
+                    setCountdown(timeLimit);
+                  }
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div
         className={`${
           showInstructions ? "blur-sm pointer-events-none select-none" : ""
@@ -565,7 +692,7 @@ const Game = () => {
             🎯 Score: <span className="text-black ">{points}</span>
           </h3>
 
-          <div className="mb-4 flex justify-center">
+          {/* <div className="mb-4 flex justify-center">
             <label className="flex items-center cursor-pointer text-md font-medium text-gray-700">
               <span className="mr-3">
                 {isTimed ? "⏱ Timed Mode" : "🧘‍♂️ Untimed Mode"}
@@ -585,7 +712,7 @@ const Game = () => {
                 ></div>
               </div>
             </label>
-          </div>
+          </div> */}
 
           {showDifficultySelector && (
             <div className="mt-2 p-4 bg-white rounded-lg shadow-md">
@@ -660,9 +787,7 @@ const Game = () => {
           <div className="flex flex-wrap gap-4 justify-center items-center mb-6">
             <button
               onClick={handleGuess}
-              className="px-6 py-3 bg-green-600 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-green-700 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-300"
-            >
-              Guess
+              className="px-6 py-3 bg-green-600 text-white rounded-full shadow-lg transform transition duration-300 hover:bg-green-700 hover:scale-105 focus:outline-none focus:ring"> Guess
             </button>
 
             {showSkipButton && (
