@@ -146,6 +146,7 @@ const Game = () => {
     if (!player || !isTimed) return;
 
     const timeOverTimer = setTimeout(() => {
+      setStreak(0);
       setMessage("😔 Time over! Correct answer was: " + player.name);
 
       const nextPlayerTimer = setTimeout(() => {
