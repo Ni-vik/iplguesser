@@ -43,10 +43,11 @@ export const getLeaderBoard = async () => {
 export const checkDevice = async (deviceId) => {
   const query = deviceId ? `?deviceId=${encodeURIComponent(deviceId)}` : '';
   const { data } = await axios.get(`${API_URL}/checkdevice${query}`);
-   return data;
+  return data;
 };
-export const registerUser = async (deviceId,name) => {
-  const { data } = await axios.post('${API_URL}/registeruser',{deviceId,name});
+
+export const registerUser = async (deviceId, name) => {
+  const { data } = await axios.post(`${API_URL}/registeruser`, { deviceId, name });
   return data;
 };
 
