@@ -8,13 +8,12 @@ const UserVerification = ({ onVerified }) => {
   const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
 
-//   let deviceId = localStorage.getItem("deviceId");
-//   if (!deviceId) {
-//     deviceId = crypto.randomUUID();
-//     localStorage.setItem("deviceId", deviceId);
-//   }
+  let deviceId = localStorage.getItem("deviceId");
+  if (!deviceId) {
+    deviceId = crypto.randomUUID();
+    localStorage.setItem("deviceId", deviceId);
+  }
 
-let deviceId = "fberfbuerbu";
 
   useEffect(() => {
     const verifyDevice = async () => {
