@@ -1,24 +1,16 @@
 import { useEffect, useState } from "react";
-import {
-  getRandomPlayer,
-  checkPlayerGuess,
-  getHint,
-  leaderBoardUpdate,
-  getLeaderBoard,
-} from "../api/playerApi";
+import { getRandomPlayer,checkPlayerGuess,getHint,leaderBoardUpdate, getLeaderBoard } from "../api/playerApi";
 import Autosuggest from "react-autosuggest";
 import LogoCard from "./LogoCard";
 import GuessInput from "./GuessInput";
 import playerNames from "../players/players.json";
 import confetti from "canvas-confetti";
 import { useRef } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  ChevronDown,
-} from "lucide-react";
+import {ChevronLeft,ChevronRight,ChevronUp,ChevronDown,} from "lucide-react";
 import { Menu, X, HelpCircle, Trophy, Home, Settings, Clock } from "lucide-react";
+import ScoreDisplay from "./scoreDisplay";
+import { checkDevice , registerUser } from "../api/playerApi";
+import UserVerification from "./verify";
 
 function launchConfetti() {
   confetti({
@@ -35,6 +27,8 @@ if (!deviceId) {
 }
 
 const Game = () => {
+  const [verified, setVerified] = useState(false);
+  const [username, setUsername] = useState("");
   const bottomRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const [player, setPlayer] = useState(null);
@@ -63,6 +57,13 @@ const Game = () => {
   const [showDifficultyModal, setShowDifficultyModal] = useState(false);
   const [timeLimit, setTimeLimit] = useState(30); // Default 30 seconds
   const [showTimerModal, setShowTimerModal] = useState(false);
+  const [isVerified ,setisVerified] = useState(false);
+
+
+
+
+
+
   const closeAllModals = () => {
     setShowInstructions(false);
     setShowLeaderboard(false);
@@ -281,6 +282,14 @@ const Game = () => {
   };
 
   if (!player) return <div className="text-center mt-10">Loading...</div>;
+
+  const handleVerified = (name) => {
+    setVerified(true);
+    setUsername(name);
+  };
+  if (!verified) {
+    return <UserVerification onVerified={handleVerified} />;
+  }
 
   const sortedYears = Object.keys(player.career).sort((a, b) => a - b);
 
@@ -685,35 +694,8 @@ const Game = () => {
       >
         {/* Your main game content here */}
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50  px-4 py-10">
-          <h2 className="text-2xl font-bold mb-2 text-green-700 font-mono text-center">
-            🔥 Max Streak: <span className="text-black">{streak}</span>
-          </h2>
-
-          <h3 className="text-xl font-semibold text-purple-700 font-serif mb-6 text-center">
-            🎯 Score: <span className="text-black ">{points}</span>
-          </h3>
-
-          {/* <div className="mb-4 flex justify-center">
-            <label className="flex items-center cursor-pointer text-md font-medium text-gray-700">
-              <span className="mr-3">
-                {isTimed ? "⏱ Timed Mode" : "🧘‍♂️ Untimed Mode"}
-              </span>
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={isTimed}
-                  onChange={() => setIsTimed(!isTimed)}
-                  className="sr-only"
-                />
-                <div className="w-12 h-6 bg-gray-300 rounded-full shadow-inner transition duration-300"></div>
-                <div
-                  className={`dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition transform duration-300 ease-in-out ${
-                    isTimed ? "translate-x-6 bg-green-400" : "bg-red-400"
-                  }`}
-                ></div>
-              </div>
-            </label>
-          </div> */}
+          <h1 className="text-2xl font-bold mb-4">Welcome, {username}!</h1>
+          <ScoreDisplay streak={streak} points={points}></ScoreDisplay>
 
           {showDifficultySelector && (
             <div className="mt-2 p-4 bg-white rounded-lg shadow-md">
@@ -837,22 +819,6 @@ const Game = () => {
           )}
         </div>
         <div ref={bottomRef} />
-        {/* <div className="p-4 max-w-md mx-auto bg-white rounded-2xl shadow-md space-y-4">
-  <h2 className="text-2xl font-bold text-center text-gray-800">Leaderboard</h2>
-  {leaderboard.map((entry, index) => (
-    <div
-      key={index}
-      className="flex justify-between items-center p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
-    >
-      <span
-        className={`text-gray-700 font-medium ${entry.deviceId === deviceId ? 'text-green-500' : ''}`}
-      >
-        {entry.name}
-      </span>
-      <span className="text-blue-600 font-bold">{entry.highScore}</span>
-    </div>
-  ))}
-</div> */}
       </div>
     </>
   );

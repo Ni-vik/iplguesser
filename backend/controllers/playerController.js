@@ -99,19 +99,8 @@ export const getSquad = async (req, res) => {
 
   try {
     let existing = await Score.findOne({ deviceId });
-
-    if (existing) {
-      if (score > existing.highScore) {
-        existing.highScore = score;
-        existing.lastUpdated = new Date();
-        await existing.save();
-      }
+    
       return res.json({ message: "Score updated", name: existing.name });
-    } else {
-      const name = generateRandomName();
-      const newEntry = await Score.create({ deviceId, highScore: score, name });  // This should work now
-      return res.json({ message: "New user added", name: newEntry.name });
-    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -163,7 +152,4 @@ export const getScore = async (req, res) => {
     res.status(500).json({ error: "Failed to retrieve score", details: err.message });
   }
 };
-
-
-
 
