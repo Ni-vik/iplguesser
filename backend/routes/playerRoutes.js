@@ -1,5 +1,6 @@
 import express from 'express';
 import { getRandomPlayer, checkGuess, getHint, getSquad , leaderBoardUpdate ,topScoreGenerator , getScore , updateScore } from '../controllers/playerController.js';
+import { checkDevice , registerUser } from '../controllers/user.js';
 
 const router = express.Router();
 
@@ -11,5 +12,7 @@ router.post('/postscore' , leaderBoardUpdate );
 router.get('/getscore' , topScoreGenerator );
 router.post('/getscorebyuser' , getScore);
 router.post('/updatescorebyuser' , updateScore);
+router.get('/checkdevice' , checkDevice);
+router.post('/registeruser' , registerUser);
 
 export default router;

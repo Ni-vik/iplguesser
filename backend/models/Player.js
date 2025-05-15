@@ -43,10 +43,12 @@ const teamSchema = new mongoose.Schema({
 
 const scoreSchema = new mongoose.Schema({
   deviceId: { type: String, required: true, unique: true },
-  name: { type: String, required: true }, // Random name
+  name: { type: String, default : "" }, // Random name
   highScore: { type: Number, required: true },
   lastUpdated: { type: Date, default: Date.now },
 });
+
+//export const Room = mongoose.model('Room', roomSchema);
 
 // Correct: collection name as a string
 export const Player = mongoose.model('Player', playerSchema, 'players');
