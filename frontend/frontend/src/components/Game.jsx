@@ -7,12 +7,16 @@ import playerNames from "../players/players.json";
 import confetti from "canvas-confetti";
 import { useRef } from "react";
 import {ChevronLeft,ChevronRight,ChevronUp,ChevronDown,} from "lucide-react";
-import { Menu, X, HelpCircle, Trophy, Home, Settings, Clock } from "lucide-react";
+import { Menu, X, HelpCircle, Trophy, Home, Settings, Clock , Users  } from "lucide-react";
 import ScoreDisplay from "./scoreDisplay";
 import { checkDevice , registerUser } from "../api/playerApi";
 import UserVerification from "./verify";
+import { useNavigate } from 'react-router-dom';
 
-function launchConfetti() {
+//import { launchConfetti , getDeviceId , handleDifficultyChange } from "../functions/gameFunction";
+
+
+export function launchConfetti() {
   confetti({
     particleCount: 150,
     spread: 90,
@@ -20,11 +24,19 @@ function launchConfetti() {
   });
 }
 
-let deviceId = localStorage.getItem("deviceId");
-if (!deviceId) {
-  deviceId = crypto.randomUUID();
-  localStorage.setItem("deviceId", deviceId);
-}
+
+    let deviceId = localStorage.getItem("deviceId");
+    if (!deviceId) {
+    deviceId = crypto.randomUUID();
+    localStorage.setItem("deviceId", deviceId);
+    }
+
+
+export const handleDifficultyChange = (e) => {
+    setDifficulty(e.target.value);
+  };
+
+
 
 const Game = () => {
   const [verified, setVerified] = useState(false);
@@ -58,6 +70,8 @@ const Game = () => {
   const [timeLimit, setTimeLimit] = useState(30); // Default 30 seconds
   const [showTimerModal, setShowTimerModal] = useState(false);
   const [isVerified ,setisVerified] = useState(false);
+  const navigate = useNavigate();
+
 
 
 
@@ -72,9 +86,7 @@ const Game = () => {
     setIsNavOpen(false);
   };
 
-  const handleDifficultyChange = (e) => {
-    setDifficulty(e.target.value);
-  };
+
 
   // Function to apply difficulty and fetch a new player
   const applyDifficultyAndFetch = () => {
@@ -368,6 +380,17 @@ const Game = () => {
               >
                 <Trophy size={20} className="mr-1" /> Leaderboard
               </button>
+                <button
+                  onClick={() => {
+                    closeAllModals();
+                    navigate("/rooms");
+                  }}
+                  className="py-2 px-4 text-white bg-blue-600 hover:bg-blue-700 rounded flex items-center transition duration-200"
+
+                >
+                  <Users size={20} className="mr-1" />Rooms
+              </button>
+
             </div>
           </div>
         </div>
@@ -428,6 +451,17 @@ const Game = () => {
               <Trophy size={20} className="mr-2" /> Leaderboard
             </div>
           </button>
+          <button
+  onClick={() => {
+    closeAllModals();
+    navigate("/rooms");
+  }}
+ className="py-2 px-4 text-white bg-blue-600 hover:bg-blue-700 rounded flex items-center transition duration-200"
+
+>
+  <Users size={20} className="mr-1" /> Rooms
+</button>
+
         </div>
       </nav>
       {showDifficultyModal && (
