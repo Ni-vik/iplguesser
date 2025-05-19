@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = 'http://localhost:5000/api/players';
+const API_URL = 'https://iplguesser.onrender.com/api/players';
 
 export const createRoom = async (userName, roomName, maxPlayers, maxUser, timeLimit, difficulty) => {
   const { data } = await axios.post(`${API_URL}/createroom`, {
