@@ -32,10 +32,6 @@ export function launchConfetti() {
     }
 
 
-export const handleDifficultyChange = (e) => {
-    setDifficulty(e.target.value);
-  };
-
 
 
 const Game = () => {
@@ -74,6 +70,10 @@ const Game = () => {
 
 
 
+
+export const handleDifficultyChange = (e) => {
+    setDifficulty(e.target.value);
+  };
 
 
 
