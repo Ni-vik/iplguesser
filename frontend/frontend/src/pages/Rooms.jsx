@@ -1,14 +1,12 @@
-import Game from '../components/Game';
 import RoomComponent from '../components/Rooms';
 import React from 'react';
 
-const Home = () => {
+const Room = () => {
   return (
     <div className="min-h-screen bg-gray-100">
-      <Game />
-
+      <RoomComponent/>
     </div>
   );
 };
 
-export default Home;
+export default Room;
