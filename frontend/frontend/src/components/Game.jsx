@@ -71,7 +71,7 @@ const Game = () => {
 
 
 
-export const handleDifficultyChange = (e) => {
+const handleDifficultyChange = (e) => {
     setDifficulty(e.target.value);
   };
 
