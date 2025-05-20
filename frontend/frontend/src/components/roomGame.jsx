@@ -194,7 +194,6 @@ const GameRoom = ({user_name,timeLimit,roomId}) => {
         setStreak(0);
         setAttemptsmade(0);
         setHintButton(false);
-        setPoints(0);
       }
     }
     setGuess("");
