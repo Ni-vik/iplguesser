@@ -8,11 +8,11 @@ dotenv.config();
 connectDB();
 
 const corsorigin = {
-  origin : 'https://guesstheplayer.onrender.com/'
+  origin : 'https://guesstheplayer.onrender.com'
 }
 
 const app = express();
-app.use(cors());
+app.use(cors(corsorigin));
 app.use(express.json());
 
 app.use('/api/players', playerRoutes);
