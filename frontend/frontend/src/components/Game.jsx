@@ -243,7 +243,7 @@ const handleDifficultyChange = (e) => {
   };
 
   const handleHint = async () => {
-    const data = await getHint(player.name);
+    const data = await getHint(player._id);
 
     // First hint shows nationality
     if (hintCount === 0) {
