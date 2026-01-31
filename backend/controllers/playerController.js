@@ -60,7 +60,6 @@ export const getHint = async (req, res) => {
     }
 
     res.json({
-      Player: playerData.Player,
       Nationality: playerData.Nationality,
       Role: playerData.Role,
     });
