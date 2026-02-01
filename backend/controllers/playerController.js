@@ -52,14 +52,14 @@ export const getHint = async (req, res) => {
   const { p_name } = req.body;
 
   try {
-    const playerData = await PlayerRole.findOne({ Player: p_name });
+    const someplayer = await Player.findById(p_name);
+    const playerData = await PlayerRole.findOne({ Player: someplayer.playerName });
 
     if (!playerData) {
       return res.status(404).json({ message: 'Player not found' });
     }
 
     res.json({
-      Player: playerData.Player,
       Nationality: playerData.Nationality,
       Role: playerData.Role,
     });
