@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getRandomPlayer,checkPlayerGuess,getHint,leaderBoardUpdate, getLeaderBoard } from "../api/playerApi";
+import { getRandomPlayer,checkPlayerGuess,getHint,leaderBoardUpdate, getLeaderBoard, getAnswer } from "../api/playerApi";
 import Autosuggest from "react-autosuggest";
 import LogoCard from "./LogoCard";
 import GuessInput from "./GuessInput";
@@ -191,13 +191,21 @@ const handleDifficultyChange = (e) => {
     return () => clearInterval(interval);
   }, [player, isTimed, timeLimit]);
 
+  const guessPlayerData = useRef(null);
+
   const handleGuess = async () => {
     if (!guess.trim()) return;
-    setAttemptsmade(attemptsmade + 1);
-
-    const data = await checkPlayerGuess(player._id, guess);
-
-    if (data.correct) {
+    const nextAttempt = attemptsmade + 1;
+    setAttemptsmade(nextAttempt);
+    let data;
+    if (nextAttempt > 2) {
+      data = await getAnswer(player._id, guess);
+      guessPlayerData.current = data;
+    } 
+    else {
+      data = await checkPlayerGuess(player._id, guess);
+    }
+    if (data.correct === true) {
       launchConfetti();
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
       setMessage("🎯 Correct! Moving to next player...");
@@ -216,19 +224,10 @@ const handleDifficultyChange = (e) => {
       }
       if (attemptsmade == 2) {
         setPoints(points + 5);
-      }
+      }    
     } else {
-      if (attemptsLeft > 1) {
-        setAttemptsmade(attemptsmade + 1);
-        setAttemptsLeft(attemptsLeft - 1);
-        setMessage(`❌ Incorrect! Attempts left: ${attemptsLeft - 1}`);
-
-        // Enable hint button after first incorrect guess
-        if (hintCount < 2) {
-          setHintButton(true);
-        }
-      } else {
-        setMessage("😔 Chances over! Correct answer was: " + player.name);
+      if (nextAttempt > 2) {
+        setMessage( "😔 Chances over! Correct answer was: " + data.correct);
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
         setShowSkipButton(false);
         setShowNextButton(true);
@@ -237,14 +236,28 @@ const handleDifficultyChange = (e) => {
         setAttemptsmade(0);
         setHintButton(false);
         setPoints(0);
+        guessPlayerData.current = null;
+      } 
+      else {
+        setAttemptsLeft(attemptsLeft - 1);
+        setMessage(`❌ Incorrect! Attempts left: ${attemptsLeft - 1}`);
+
+        if (hintCount < 2) {
+          setHintButton(true);
+        }
       }
     }
     setGuess("");
   };
 
-  const handleHint = async () => {
-    const data = await getHint(player._id);
+  const somePlayerRef = useRef(null);
 
+  const handleHint = async () => {
+    if (!somePlayerRef.current) {
+
+      somePlayerRef.current = await getHint(player._id);
+    }
+    const data = somePlayerRef.current;
     // First hint shows nationality
     if (hintCount === 0) {
       setNationality(data.Nationality);
@@ -305,9 +318,10 @@ const handleDifficultyChange = (e) => {
 
   const sortedYears = Object.keys(player.career).sort((a, b) => a - b);
 
-  function showAnswer() {
+   async function showAnswer() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    setMessage("The correct player was: " + player.name);
+    const data = await getAnswer(player._id, "nodata");
+    setMessage("The correct player was: " + data.correct);
     setTimeout(fetchNewPlayer, 2000);
     submitScore(deviceId, streak);
     setStreak(0);

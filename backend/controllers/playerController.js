@@ -164,3 +164,21 @@ export const getScore = async (req, res) => {
   }
 };
 
+export const getAnswer = async (req, res) => {
+  const { playerId, guess } = req.body;
+
+  try {
+    const player = await Player.findById(playerId);
+    if (!player) {
+      return res.status(404).json({ message: 'Player not found' });
+    }
+
+    if (player.playerName.toLowerCase() === guess.toLowerCase()) {
+      res.json({ correct: true });
+    } else {
+      res.json({ correct: player.playerName });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

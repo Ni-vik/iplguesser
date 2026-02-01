@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useState } from 'react';
 import { teamLogoMap } from '../utils/teamLogoMap';
+import { getSquad } from '../api/playerApi';
 
 
 const LogoCard = ({ team, year, attempts, isSelected, selectionMade, onSelect }) => {
@@ -20,11 +21,8 @@ const LogoCard = ({ team, year, attempts, isSelected, selectionMade, onSelect })
     }
 
     try {
-      const response = await axios.post('https://iplguesser.onrender.com/api/players/squad', {
-        team,
-        year,
-      });
-      const playerNames = response.data.map((player) => player.name);
+      const response = await getSquad(team,year);
+      const playerNames = response.map((player) => player.name);
       setPlayerNames(playerNames);
       setIsModalOpen(true);
     } catch (error) {

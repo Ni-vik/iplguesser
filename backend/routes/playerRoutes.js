@@ -1,5 +1,5 @@
 import express from 'express';
-import { getRandomPlayer, checkGuess, getHint, getSquad , leaderBoardUpdate ,topScoreGenerator , getScore , updateScore } from '../controllers/playerController.js';
+import { getRandomPlayer, checkGuess, getHint, getSquad , leaderBoardUpdate ,topScoreGenerator , getScore , updateScore, getAnswer } from '../controllers/playerController.js';
 import { checkDevice , registerUser } from '../controllers/user.js';
 import {getRoomScoreboard, createRoom ,joinroom , startGame , getplayer , submitRoomScore } from '../controllers/rooms.js';
 const router = express.Router();
@@ -17,6 +17,7 @@ router.post('/registeruser' , registerUser);
 router.post('/createroom' ,createRoom );
 router.post('/startgame',startGame);
 router.post('/joinroom', joinroom );
+router.post('/getanswer', getAnswer);
 
 // Express route
 router.get('/:roomId/player/:index', getplayer);
