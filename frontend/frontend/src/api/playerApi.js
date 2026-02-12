@@ -51,5 +51,8 @@ export const registerUser = async (deviceId, name) => {
   return data;
 };
 
-
+export const getAnswer = async (playerId, guess) => {
+  const { data } = await axios.post(`${API_URL}/getanswer`, { playerId, guess });
+  return data;
+};
 
